@@ -1,0 +1,8 @@
+category page
+    1, add swipe down to delete it
+    2, Swipe right to complete
+    3, Swipe left to Cancel
+    4, Notification and alarm bell on each task, cleck on bel to turn on or off
+    5, show notes on detail page about the task
+
+    
