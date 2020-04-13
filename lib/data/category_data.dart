@@ -21,6 +21,7 @@ class CategoryData with ChangeNotifier {
   ];
 
   List<CategoryModel> get categories => _categories;
+  CategoryModel lastRemoved;
 
   void add(CategoryModel category) {
     _categories.insert(0, category);
@@ -29,6 +30,7 @@ class CategoryData with ChangeNotifier {
 
   void remove(CategoryModel category) {
     _categories.remove(category);
+    lastRemoved = lastRemoved;
     notifyListeners();
   }
 
@@ -36,5 +38,9 @@ class CategoryData with ChangeNotifier {
     final indeOfOld = _categories.indexOf(old);
     _categories.replaceRange(indeOfOld, indeOfOld + 1, [updated]);
     notifyListeners();
+  }
+
+  void undo() {
+    add(lastRemoved);
   }
 }

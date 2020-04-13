@@ -163,8 +163,8 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                           height: 180,
                           child: SingleChildScrollView(
                               child: IconPicker(
-                            colorCode: _color,
-                            onSelected: (icon) {
+                            color: _color,
+                            onSelect: (icon) {
                               setState(() {
                                 _icon = icon;
                               });
@@ -188,7 +188,7 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                             child: SingleChildScrollView(
                               child: ColorPicker(
                                 selected: _color,
-                                onUpdate: (col) {
+                                onSelect: (col) {
                                   setState(() {
                                     _color = col;
                                   });
@@ -305,7 +305,7 @@ class AddCategoryFormState extends State<AddCategoryForm> {
 
 @immutable
 class ColorPicker extends StatefulWidget {
-  ColorPicker({@required this.onUpdate, @required this.selected});
+  ColorPicker({@required this.onSelect, @required this.selected});
 
   static List<Color> colors = [
     Colors.green,
@@ -334,7 +334,7 @@ class ColorPicker extends StatefulWidget {
     Colors.white12
   ];
 
-  final Function(Color color) onUpdate;
+  final Function(Color color) onSelect;
   Color selected;
 
   @override
@@ -352,21 +352,19 @@ class _ColorPickerState extends State<ColorPicker> {
     return Wrap(
         children: ColorPicker.colors
             .map((color) => Padding(
-                  padding: const EdgeInsets.all(7.0),
+                  padding: const EdgeInsets.all(7),
                   child: ClipOval(
                     child: Container(
                       color: color,
                       child: InkWell(
                         splashColor: const Color(0xFFE0D4B9),
                         onTap: () {
-                          widget.onUpdate(color);
+                          widget.onSelect(color);
                           setState(() {
                             widget.selected = color;
                           });
                         },
-                        child: color == widget.selected
-                            ? const SizedBox(width: 54, height: 54)
-                            : const SizedBox(width: 41, height: 41),
+                        child: const SizedBox(width: 41, height: 41),
                       ),
                     ),
                   ),
@@ -378,15 +376,14 @@ class _ColorPickerState extends State<ColorPicker> {
 @immutable
 class IconPicker extends StatefulWidget {
   IconPicker(
-      {@required this.colorCode,
-      @required this.selected,
-      @required this.onSelected});
+      {@required this.color, @required this.selected, @required this.onSelect});
 
-  final Color colorCode;
-  final Function(IconData icon) onSelected;
+  final Color color;
+  final Function(IconData icon) onSelect;
   IconData selected;
 
   static List<IconData> icons = [
+    FontAwesomeIcons.accessibleIcon,
     FontAwesomeIcons.solidHeart,
     FontAwesomeIcons.lightbulb,
     FontAwesomeIcons.bookOpen,
@@ -458,21 +455,20 @@ class _IconPickerState extends State<IconPicker> {
     return Wrap(
         children: IconPicker.icons
             .map((icon) => Padding(
-                  padding: const EdgeInsets.all(7.0),
-                  child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        widget.selected = icon;
-                        widget.onSelected(widget.selected);
-                      });
-                    },
-                    icon: Icon(
-                      icon,
-                      size: widget.selected == icon ? 54 : 41,
-                      color: widget.selected == icon
-                          ? widget.colorCode
-                          : Colors.black,
-                    ),
+                  padding: const EdgeInsets.all(7),
+                  child: ClipOval(
+                    child: InkWell(
+                        onTap: () {
+                          widget.onSelect(icon);
+                          setState(() {
+                            widget.selected = icon;
+                          });
+                        },
+                        child: Icon(
+                          icon,
+                          size: 41,
+                          color: widget.color,
+                        )),
                   ),
                 ))
             .toList());
