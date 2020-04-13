@@ -10,12 +10,12 @@ class AddHabitPage extends StatefulWidget {
 }
 
 class _AddHabitPageState extends State<AddHabitPage> {
-  Habit habit;
+  HabitModel habit;
 
   @override
   void initState() {
     super.initState();
-    habit = Habit();
+    habit = HabitModel();
   }
 
   @override

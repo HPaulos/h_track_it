@@ -43,7 +43,7 @@ class CategoryPage extends StatelessWidget {
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.all(21.0),
+        padding: const EdgeInsets.all(21),
         child: FloatingActionButton(
           elevation: 12,
           onPressed: () {
@@ -98,53 +98,71 @@ class Category extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoriesProvider = Provider.of<CategoryData>(context);
 
-    return Container(
-      padding: const EdgeInsets.all(7),
-      height: 100,
-      width: 100,
-      child: GestureDetector(
-        onTapDown: (details) {
-          _tapPosition = details.globalPosition;
-        },
-        child: RaisedButton(
-          onLongPress: () {
-            showPopUpMenu(context, _category, () {
-              categoriesProvider.remove(_category);
-            }, () {
-              Navigator.pushNamed(context, '/newCategory',
-                  arguments: _category);
-            });
-          },
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 12),
+      child: Container(
+        height: 100,
+        width: 100,
+        child: Material(
+          elevation: 7,
+          shadowColor: const Color(0xFFFC9C35),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(27),
+            bottomRight: Radius.circular(27),
+            topRight: Radius.circular(27),
+            bottomLeft: Radius.circular(27),
+          ),
           color: const Color(0xFFF2EBDA),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(27)),
-          onPressed: () {
-            Navigator.pushNamed(context, _gotToPage);
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                child: Icon(
-                  _category.icon,
-                  size: 41,
-                  color: _category.color,
-                  semanticLabel: _category.name,
+          child: InkWell(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(27),
+              bottomRight: Radius.circular(27),
+              topRight: Radius.circular(27),
+              bottomLeft: Radius.circular(27),
+            ),
+            splashColor: const Color(0xFFFC9C35),
+            highlightColor: const Color(0xFFFC9C35),
+            onTapDown: (details) {
+              _tapPosition = details.globalPosition;
+            },
+            onLongPress: () {
+              showPopUpMenu(context, _category, () {
+                categoriesProvider.remove(_category);
+              }, () {
+                Navigator.pushNamed(context, '/newCategory',
+                    arguments: _category);
+              });
+            },
+            onTap: () {
+              Navigator.pushNamed(context, _gotToPage,
+                  arguments: _category);
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                  child: Icon(
+                    _category.icon,
+                    size: 41,
+                    color: _category.color,
+                    semanticLabel: _category.name,
+                  ),
                 ),
-              ),
-              FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Text(
-                  _category.name,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: Text(
+                    _category.name,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -167,20 +185,21 @@ class Category extends StatelessWidget {
           onDelete: () {
             onDelete();
           },
-          onEdit: () {
-            onEdit();
-          },
+          onEdit: onEdit,
         )
       ],
     );
   }
 }
 
+@immutable
 class DeleteEditPopUpMenu extends PopupMenuEntry<int> {
-  DeleteEditPopUpMenu({this.onDelete, this.onEdit});
+  const DeleteEditPopUpMenu({Function onDelete, Function onEdit})
+      : _onDelete = onDelete,
+        _onEdit = onEdit;
 
-  Function onDelete;
-  Function onEdit;
+  final Function _onDelete;
+  final Function _onEdit;
 
   @override
   State<StatefulWidget> createState() {
@@ -210,9 +229,7 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
         children: <Widget>[
           Expanded(
             child: IconButton(
-              onPressed: () {
-                confirmDelete();
-              },
+              onPressed: confirmDelete,
               icon: Icon(
                 Icons.delete,
                 color: Colors.redAccent,
@@ -223,7 +240,8 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
           Expanded(
             child: IconButton(
               onPressed: () {
-                widget.onEdit();
+                Navigator.pop<int>(context, -1);
+                widget._onEdit();
               },
               icon: Icon(
                 Icons.edit,
@@ -272,8 +290,9 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
             FlatButton(
               color: Colors.red,
               onPressed: () {
-                widget.onDelete();
+                widget._onDelete();
                 Navigator.of(context).pop();
+                Navigator.pop<int>(context, -1);
               },
               child: const Text(
                 'Delete',
@@ -283,8 +302,8 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
             FlatButton(
               color: Colors.green,
               onPressed: () {
-                Navigator.pop<int>(context, -1);
                 Navigator.of(context).pop();
+                Navigator.pop<int>(context, -1);
               },
               child: const Text(
                 'Cancel',

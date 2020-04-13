@@ -25,9 +25,9 @@ class _CalendarPageState extends State<CalendarPage> {
     return Scaffold(
       backgroundColor: Color(0xFFE0D4B9),
       appBar: AppBar(
-        title: Text("Tasks List"),
+        title: const Text("Tasks List"),
         leading: Container(),
-        actions: <Widget>[],
+        actions: const <Widget>[],
       ),
       body: ListView(
         children: <Widget>[

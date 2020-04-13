@@ -1,7 +1,17 @@
+import 'package:flutter/foundation.dart';
+
 import 'category.dart';
 import 'task.dart';
 
-class Habit {
+class HabitModel {
+  HabitModel(
+      {@required this.name,
+      @required this.start,
+      @required this.end,
+      @required this.category,
+      @required this.upcomming,
+      @required this.last});
+
   String name;
   DateTime start;
   DateTime end;

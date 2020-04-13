@@ -1,7 +1,11 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../data/habits_data.dart';
+import '../model/category.dart';
+import '../model/habit.dart';
 
 class HabitListPage extends StatefulWidget {
   @override
@@ -11,92 +15,71 @@ class HabitListPage extends StatefulWidget {
 }
 
 class _HabitListPageState extends State<HabitListPage> {
-  HabitItem updated;
+  CategoryModel _category;
+  HabitModel _updated;
+  List<HabitModel> _habits;
 
-  List<HabitItem> habits = [
-    HabitItem(
-        name: "Read Bible",
-        upcommingTime: "6:00 PM",
-        startDate: "04/21/2020",
-        endDate: "04/21/2020",
-        icon: FontAwesomeIcons.bookOpen,
-        categoryColor: "0xFF800000",
-        completed: 5,
-        total: 10),
-    HabitItem(
-        name: "Do 100 pushups",
-        upcommingTime: "5:00 PM",
-        startDate: "04/21/2020",
-        endDate: "04/21/2020",
-        icon: FontAwesomeIcons.running,
-        categoryColor: "0xFFFF0000",
-        completed: 5,
-        total: 10),
-    HabitItem(
-        name: "Night Prayer",
-        upcommingTime: "10:00 PM",
-        startDate: "04/21/2020",
-        endDate: "04/21/2020",
-        icon: FontAwesomeIcons.pray,
-        categoryColor: "0xFF0000FF",
-        completed: 5,
-        total: 10),
-    HabitItem(
-        name: "Call Family",
-        upcommingTime: "6:00 PM",
-        startDate: "04/21/2020",
-        endDate: "04/21/2020",
-        icon: FontAwesomeIcons.solidHeart,
-        categoryColor: "0xFF00FF70",
-        completed: 5,
-        total: 10),
-    HabitItem(
-        name: "Read Bible",
-        upcommingTime: "6:00 PM",
-        startDate: "04/21/2020",
-        endDate: "04/21/2020",
-        icon: FontAwesomeIcons.bookOpen,
-        categoryColor: "0xFF800000",
-        completed: 5,
-        total: 10),
-  ];
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    _category = ModalRoute.of(context).settings.arguments as CategoryModel;
+
+    if (_category != null) {
+      _habits =
+          Provider.of<HabitData>(context).searchByCategory(_category.name);
+    } else {
+      _habits = Provider.of<HabitData>(context).habits;
+    }
+
     return Scaffold(
-      backgroundColor: Color(0xFFE0D4B9),
+      backgroundColor: const Color(0xFFE0D4B9),
       appBar: AppBar(
-        title: Text("Habits"),
+        title: const Text("Habits"),
       ),
       body: Builder(builder: (bContext) {
+        if (_habits.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(27),
+              child: Text(
+                "No habits under ${_category.name} is found.",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          );
+        }
         return ListView.builder(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 7),
-          itemCount: habits.length,
-          itemBuilder: (BuildContext ctx, int index) {
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 7),
+          itemCount: _habits.length,
+          itemBuilder: (ctx, index) {
             return Dismissible(
               key: UniqueKey(),
               onDismissed: (direction) {
-                this.updated = habits[index];
-                this.habits.removeAt(index);
+                _updated = _habits[index];
+                _habits.removeAt(index);
                 Scaffold.of(bContext).hideCurrentSnackBar();
                 Scaffold.of(bContext).showSnackBar(new SnackBar(
-                  backgroundColor: Color(0xFFE0D4B9),
-                  duration: Duration(seconds: 3),
+                  backgroundColor: const Color(0xFFE0D4B9),
+                  duration: const Duration(seconds: 3),
                   content: InkWell(
                     onTap: () {
                       Scaffold.of(bContext).hideCurrentSnackBar();
                       setState(() {
-                        habits.insert(index, updated);
+                        _habits.insert(index, _updated);
                       });
                     },
                     child: Row(
                       children: <Widget>[
-                        Text(
+                        const Text(
                           "1 Task Update",
                           style: TextStyle(color: Colors.black, fontSize: 19),
                         ),
-                        Spacer(),
-                        Text(
+                        const Spacer(),
+                        const Text(
                           "Undo",
                           style: TextStyle(color: Colors.blue, fontSize: 19),
                         )
@@ -163,48 +146,50 @@ class _HabitListPageState extends State<HabitListPage> {
               ),
               child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: habits[index]),
+                  child: HabitItem(_habits[index])),
             );
           },
         );
       }),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.all(21.0),
+        padding: const EdgeInsets.all(21),
         child: FloatingActionButton(
-            elevation: 12,
-            onPressed: () {
-              Navigator.pushNamed(context, '/newHabit');
-            },
-            child: Icon(
-              Icons.add,
-              size: 27,
-              color: Colors.black,
-            ),
-            backgroundColor: Color(0xFFE0D4B9)),
+          elevation: 12,
+          onPressed: () {
+            Navigator.pushNamed(context, '/newHabit');
+          },
+          backgroundColor: const Color(0xFFFC9C35),
+          child: const Icon(
+            Icons.add,
+            size: 27,
+            color: Colors.black,
+          ),
+        ),
       ),
     );
   }
 }
 
+@immutable
 class HabitItem extends StatelessWidget {
-  String name;
-  String upcommingTime;
-  String startDate;
-  String endDate;
-  String categoryColor;
-  IconData icon;
-  int completed = 7;
-  int total = 10;
+  HabitItem(HabitModel habitModel)
+      : _name = habitModel.name,
+        _upcommingTime = DateFormat.MEd().format(habitModel.upcomming.dateTime),
+        _startDate = DateFormat.MEd().format(habitModel.start),
+        _endDate = DateFormat.MEd().format(habitModel.end),
+        _color = habitModel.category.color,
+        _icon = habitModel.category.icon,
+        _completed = 1,
+        _total = 1;
 
-  HabitItem(
-      {@required this.name,
-      @required this.upcommingTime,
-      @required this.startDate,
-      @required this.endDate,
-      @required this.icon,
-      @required this.categoryColor,
-      @required this.completed,
-      @required this.total});
+  final String _name;
+  final String _upcommingTime;
+  final String _startDate;
+  final String _endDate;
+  final Color _color;
+  final IconData _icon;
+  final int _completed;
+  final int _total;
 
   @override
   Widget build(BuildContext context) {
@@ -213,12 +198,10 @@ class HabitItem extends StatelessWidget {
         Navigator.pushNamed(context, '/habitdetail');
       },
       child: Card(
-          color: Color(0xFFF2EBDA),
+          color: const Color(0xFFF2EBDA),
           child: Container(
             decoration: BoxDecoration(
-                border: Border(
-                    left: BorderSide(
-                        width: 3, color: Color(int.parse(categoryColor))))),
+                border: Border(left: BorderSide(width: 3, color: _color))),
             child: Column(
               children: <Widget>[
                 Padding(
@@ -235,9 +218,9 @@ class HabitItem extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(right: 7),
                                   child: Icon(
-                                    icon,
+                                    _icon,
                                     size: 21,
-                                    color: Color(int.parse(categoryColor)),
+                                    color: _color,
                                   ),
                                 ),
                               ],
@@ -245,18 +228,18 @@ class HabitItem extends StatelessWidget {
                             Column(
                               children: <Widget>[
                                 Text(
-                                  name,
-                                  style: TextStyle(
+                                  _name,
+                                  style: const TextStyle(
                                     fontSize: 19,
                                   ),
                                 ),
                               ],
                             ),
-                            Spacer(),
+                            const Spacer(),
                             Column(
                               children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 3),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 3),
                                   child: Text(
                                     "Upcomming",
                                     style: TextStyle(
@@ -265,9 +248,9 @@ class HabitItem extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  upcommingTime,
-                                  style: TextStyle(
-                                    fontSize: 19,
+                                  _upcommingTime,
+                                  style: const TextStyle(
+                                    fontSize: 16,
                                   ),
                                 ),
                               ],
@@ -283,9 +266,8 @@ class HabitItem extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 3, top: 3),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 3, top: 3),
                                   child: Text(
                                     "Start Date",
                                     style: TextStyle(
@@ -294,21 +276,20 @@ class HabitItem extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  startDate,
-                                  style: TextStyle(
+                                  _startDate,
+                                  style: const TextStyle(
                                     fontSize: 19,
                                   ),
                                 ),
                               ],
                             ),
-                            Spacer(),
+                            const Spacer(),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(bottom: 3, top: 3),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 3, top: 3),
                                   child: Text(
                                     "End Date",
                                     style: TextStyle(
@@ -317,8 +298,8 @@ class HabitItem extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  startDate,
-                                  style: TextStyle(
+                                  _endDate,
+                                  style: const TextStyle(
                                     fontSize: 19,
                                   ),
                                 ),
@@ -333,17 +314,17 @@ class HabitItem extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     Expanded(
-                        flex: completed,
+                        flex: _completed,
                         child: Container(
                             color: Colors.green,
-                            child: SizedBox(
+                            child: const SizedBox(
                               height: 3,
                             ))),
                     Expanded(
-                        flex: total - completed,
+                        flex: _total - _completed,
                         child: Container(
                             color: Colors.white,
-                            child: SizedBox(
+                            child: const SizedBox(
                               height: 3,
                             )))
                   ],

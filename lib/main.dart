@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:track_it/data/habits_data.dart';
 import 'data/category_data.dart';
 import 'pages/add_category.dart';
 import 'pages/add_habit_page.dart';
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-         ChangeNotifierProvider(create: (_) => CategoryData()),
+        ChangeNotifierProvider(create: (_) => CategoryData()),
+        ChangeNotifierProvider(create: (_) => HabitData()),
       ],
       child: MaterialApp(
         theme: ThemeData(

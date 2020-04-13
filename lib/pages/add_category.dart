@@ -163,6 +163,7 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                           height: 180,
                           child: SingleChildScrollView(
                               child: IconPicker(
+                            selected: _icon,
                             color: _color,
                             onSelect: (icon) {
                               setState(() {
@@ -184,7 +185,7 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                         child: SizedBox(
                           height: 180,
                           child: Padding(
-                            padding: const EdgeInsets.all(12.0),
+                            padding: const EdgeInsets.all(12),
                             child: SingleChildScrollView(
                               child: ColorPicker(
                                 selected: _color,
@@ -213,7 +214,17 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                               color: const Color(0xFFE0D4B9),
                               onPressed: () {
                                 if (_name == null || _name.isEmpty) {
-                                  setState(showErrorMessage);
+                                  setState(() {
+                                    showErrorMessage(
+                                        'Please provide the new group name.');
+                                  });
+                                } else if (!_isUpdating &&
+                                    categoriesProvider
+                                        .searchCategoryByName(_name)) {
+                                  setState(() {
+                                    showErrorMessage(
+                                        'The group name you provided is already in use. Pleae enter a new group name.');
+                                  });
                                 } else {
                                   if (_isUpdating) {
                                     categoriesProvider.update(
@@ -228,11 +239,11 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                                         name: _name,
                                         icon: _icon));
                                   }
-
                                   _name = "";
                                   _color = ColorPicker.colors[0];
                                   _icon = IconPicker.icons[0];
                                   Navigator.of(context).pop();
+                                  
                                 }
                               },
                               child: _isUpdating
@@ -267,27 +278,29 @@ class AddCategoryFormState extends State<AddCategoryForm> {
 
   bool goBack(BuildContext context) => Navigator.of(context).pop();
 
-  Future<void> showErrorMessage() async {
+  Future<void> showErrorMessage(String message) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          titlePadding: const EdgeInsets.all(21),
-          contentPadding: const EdgeInsets.all(21),
+          titlePadding:
+              const EdgeInsets.symmetric(horizontal: 21, vertical: 21),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 21, vertical: 3),
           backgroundColor: const Color(0xFFE0D4B9),
           contentTextStyle: const TextStyle(fontSize: 21, color: Colors.black),
           title: const Text('Invalid Input'),
           content: SingleChildScrollView(
             child: ListBody(
-              children: const <Widget>[
-                Text('Please provide the new group name.'),
+              children: <Widget>[
+                Text(message),
               ],
             ),
           ),
           actions: <Widget>[
             FlatButton(
-              color: const Color(0xFFE0D4B9),
+              color: Colors.green,
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -319,7 +332,6 @@ class ColorPicker extends StatefulWidget {
     Colors.yellow,
     Colors.yellowAccent,
     Colors.amberAccent,
-    Colors.brown,
     Colors.brown,
     Colors.teal,
     Colors.tealAccent,
@@ -364,7 +376,9 @@ class _ColorPickerState extends State<ColorPicker> {
                             widget.selected = color;
                           });
                         },
-                        child: const SizedBox(width: 41, height: 41),
+                        child: widget.selected == color
+                            ? const SizedBox(width: 54, height: 54)
+                            : const SizedBox(width: 41, height: 41),
                       ),
                     ),
                   ),
@@ -376,11 +390,16 @@ class _ColorPickerState extends State<ColorPicker> {
 @immutable
 class IconPicker extends StatefulWidget {
   IconPicker(
-      {@required this.color, @required this.selected, @required this.onSelect});
+      {@required Color color,
+      @required IconData selected,
+      @required Function(IconData icon) onSelect})
+      : this._color = color,
+        this._onSelect = onSelect,
+        this._selected = selected;
 
-  final Color color;
-  final Function(IconData icon) onSelect;
-  IconData selected;
+  final Color _color;
+  final Function(IconData icon) _onSelect;
+  IconData _selected;
 
   static List<IconData> icons = [
     FontAwesomeIcons.accessibleIcon,
@@ -459,15 +478,15 @@ class _IconPickerState extends State<IconPicker> {
                   child: ClipOval(
                     child: InkWell(
                         onTap: () {
-                          widget.onSelect(icon);
+                          widget._onSelect(icon);
                           setState(() {
-                            widget.selected = icon;
+                            widget._selected = icon;
                           });
                         },
                         child: Icon(
                           icon,
-                          size: 41,
-                          color: widget.color,
+                          size: icon == widget._selected ? 54 : 41,
+                          color: widget._color,
                         )),
                   ),
                 ))
