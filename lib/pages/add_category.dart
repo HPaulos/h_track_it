@@ -175,7 +175,7 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                                     labelText: "Group Icon"),
                                 child: Scrollbar(
                                   child: SizedBox(
-                                    height: 180,
+                                    height: 120,
                                     child: SingleChildScrollView(
                                         child: IconPicker(
                                       selected: _icon,
@@ -197,7 +197,7 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                                     labelText: "Group Color"),
                                 child: Scrollbar(
                                   child: SizedBox(
-                                    height: 180,
+                                    height: 120,
                                     child: SingleChildScrollView(
                                       child: ColorPicker(
                                         selected: _color,

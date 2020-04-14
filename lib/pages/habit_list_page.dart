@@ -198,6 +198,7 @@ class HabitItem extends StatelessWidget {
         Navigator.pushNamed(context, '/habitdetail');
       },
       child: Card(
+          elevation: 5,
           color: const Color(0xFFF2EBDA),
           child: Container(
             decoration: BoxDecoration(
@@ -248,7 +249,7 @@ class HabitItem extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  _upcommingTime,
+                                  _upcommingTime ?? "no upcomming task",
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),

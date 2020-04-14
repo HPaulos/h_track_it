@@ -13,6 +13,7 @@ class HabitModel {
       @required this.last});
 
   String name;
+  String note;
   DateTime start;
   DateTime end;
   CategoryModel category;
