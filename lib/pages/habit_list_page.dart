@@ -156,7 +156,7 @@ class _HabitListPageState extends State<HabitListPage> {
         child: FloatingActionButton(
           elevation: 12,
           onPressed: () {
-            Navigator.pushNamed(context, '/newHabit');
+            Navigator.pushNamed(context, '/newHabit', arguments: _category);
           },
           backgroundColor: const Color(0xFFFC9C35),
           child: const Icon(

@@ -14,7 +14,6 @@ class AddCategoryPage extends StatefulWidget {
 class _AddCategoryPageState extends State<AddCategoryPage> {
   @override
   Widget build(BuildContext context) {
-    final categoriesProvider = Provider.of<CategoryData>(context, listen: true);
     final model = ModalRoute.of(context).settings.arguments;
     Widget form;
 
@@ -24,7 +23,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
         category: cModel,
       );
     } else {
-      form = AddCategoryForm();
+      form = const AddCategoryForm();
     }
 
     return Scaffold(
@@ -54,6 +53,21 @@ class AddCategoryForm extends StatefulWidget {
 }
 
 class AddCategoryFormState extends State<AddCategoryForm> {
+  static final InputDecoration _decoration = InputDecoration(
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(5),
+    ),
+    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+    labelStyle: const TextStyle(color: Colors.black),
+    labelText: "Group Name",
+  );
+
   String _name;
   Color _color;
   IconData _icon;
@@ -74,6 +88,8 @@ class AddCategoryFormState extends State<AddCategoryForm> {
       _icon = widget.category.icon;
     } else {
       _isUpdating = false;
+      _icon = IconPicker.icons[0];
+      _color = ColorPicker.colors[0];
     }
     _controller.text = _name;
   }
@@ -95,32 +111,27 @@ class AddCategoryFormState extends State<AddCategoryForm> {
               const EdgeInsets.only(left: 21, right: 21, top: 12, bottom: 7),
           child: Card(
             color: const Color(0xFFF2EBDA),
-            child: Container(
+            child: Padding(
               padding:
                   const EdgeInsets.only(left: 12, right: 12, top: 7, bottom: 7),
               child: Column(
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.only(left: 12, right: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Row(
                       children: <Widget>[
-                        const Padding(
-                          padding: EdgeInsets.only(left: 12, right: 7),
-                          child: Text(
-                            "Name",
-                            style: TextStyle(fontSize: 19),
-                          ),
-                        ),
                         Expanded(
-                            child: Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: TextField(
-                            controller: _controller,
-                            style: const TextStyle(fontSize: 19),
-                            decoration: const InputDecoration(
-                              hintText: "Enter Group Name",
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
+                            child: TextField(
+                          controller: _controller,
+                          decoration: _decoration.copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed: () {
+                                _controller.text = "";
+                              },
                             ),
                           ),
                         ))
@@ -128,79 +139,82 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 12, top: 12),
-                    child: Row(
-                      children: <Widget>[
-                        const Flexible(
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 12),
-                            child: Text(
-                              "Pick an Icon and Color",
-                              style:
-                                  TextStyle(fontSize: 19, color: Colors.black),
-                            ),
-                          ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: InputDecorator(
+                        decoration: _decoration.copyWith(
+                          labelText: "Pick Icon and Color for the group",
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: Icon(
-                            _icon,
-                            size: 27,
-                            color: _color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.black)),
-                    child: Scrollbar(
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: SizedBox(
-                          height: 180,
-                          child: SingleChildScrollView(
-                              child: IconPicker(
-                            selected: _icon,
-                            color: _color,
-                            onSelect: (icon) {
-                              setState(() {
-                                _icon = icon;
-                              });
-                            },
-                          )),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.black)),
-                    child: Scrollbar(
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: SizedBox(
-                          height: 180,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: SingleChildScrollView(
-                              child: ColorPicker(
-                                selected: _color,
-                                onSelect: (col) {
-                                  setState(() {
-                                    _color = col;
-                                  });
-                                },
+                        child: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Row(
+                                children: <Widget>[
+                                  const Flexible(
+                                    child: Text(
+                                      "Icon and Color Selected",
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.black),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 12),
+                                    child: Icon(
+                                      _icon,
+                                      size: 27,
+                                      color: _color,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 7),
+                              child: InputDecorator(
+                                decoration: _decoration.copyWith(
+                                    labelText: "Group Icon"),
+                                child: Scrollbar(
+                                  child: SizedBox(
+                                    height: 180,
+                                    child: SingleChildScrollView(
+                                        child: IconPicker(
+                                      selected: _icon,
+                                      color: _color,
+                                      onSelect: (icon) {
+                                        setState(() {
+                                          _icon = icon;
+                                        });
+                                      },
+                                    )),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 7),
+                              child: InputDecorator(
+                                decoration: _decoration.copyWith(
+                                    labelText: "Group Color"),
+                                child: Scrollbar(
+                                  child: SizedBox(
+                                    height: 180,
+                                    child: SingleChildScrollView(
+                                      child: ColorPicker(
+                                        selected: _color,
+                                        onSelect: (col) {
+                                          setState(() {
+                                            _color = col;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                  ),
+                      )),
                   Padding(
                     padding: const EdgeInsets.only(left: 27, right: 27),
                     child: Row(
@@ -243,7 +257,6 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                                   _color = ColorPicker.colors[0];
                                   _icon = IconPicker.icons[0];
                                   Navigator.of(context).pop();
-                                  
                                 }
                               },
                               child: _isUpdating
