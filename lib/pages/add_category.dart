@@ -65,8 +65,8 @@ class AddCategoryFormState extends State<AddCategoryForm> {
     ),
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
     labelStyle: const TextStyle(color: Colors.black),
-    labelText: "Group Name",
   );
+  final _formKey = GlobalKey<FormState>();
 
   String _name;
   Color _color;
@@ -109,178 +109,194 @@ class AddCategoryFormState extends State<AddCategoryForm> {
         Container(
           padding:
               const EdgeInsets.only(left: 21, right: 21, top: 12, bottom: 7),
-          child: Card(
-            color: const Color(0xFFF2EBDA),
-            child: Padding(
-              padding:
-                  const EdgeInsets.only(left: 12, right: 12, top: 7, bottom: 7),
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                            child: TextField(
-                          controller: _controller,
-                          decoration: _decoration.copyWith(
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                color: Colors.redAccent,
-                              ),
-                              onPressed: () {
-                                _controller.text = "";
-                              },
-                            ),
-                          ),
-                        ))
-                      ],
-                    ),
-                  ),
-                  Padding(
+          child: Form(
+            key: _formKey,
+            child: Card(
+              color: const Color(0xFFF2EBDA),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 12, right: 12, top: 7, bottom: 7),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: InputDecorator(
-                        decoration: _decoration.copyWith(
-                          labelText: "Pick Icon and Color for the group",
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: Row(
-                                children: <Widget>[
-                                  const Flexible(
-                                    child: Text(
-                                      "Icon and Color Selected",
-                                      style: TextStyle(
-                                          fontSize: 16, color: Colors.black),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 12),
-                                    child: Icon(
-                                      _icon,
-                                      size: 27,
-                                      color: _color,
-                                    ),
-                                  ),
-                                ],
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                              child: TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Group Name can't be empty.";
+                              } else {
+                                if (!_isUpdating &&
+                                    categoriesProvider
+                                        .searchCategoryByName(_name)) {
+                                  return "Name is already in use by another group.";
+                                }
+
+                                if (_isUpdating &&
+                                    widget.category.name.toLowerCase() !=
+                                        _name.toLowerCase() &&
+                                    categoriesProvider.searchCategoryByName(
+                                        _name.toLowerCase())) {
+                                  return "Name is already in use by another group.";
+                                }
+
+                                return null;
+                              }
+                            },
+                            controller: _controller,
+                            decoration: _decoration.copyWith(
+                              labelText: "Group Name",
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: Colors.redAccent,
+                                ),
+                                onPressed: () {
+                                  _controller.text = "";
+                                },
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 7),
-                              child: InputDecorator(
-                                decoration: _decoration.copyWith(
-                                    labelText: "Group Icon"),
-                                child: Scrollbar(
-                                  child: SizedBox(
-                                    height: 120,
-                                    child: SingleChildScrollView(
-                                        child: IconPicker(
-                                      selected: _icon,
-                                      color: _color,
-                                      onSelect: (icon) {
-                                        setState(() {
-                                          _icon = icon;
-                                        });
-                                      },
-                                    )),
+                          ))
+                        ],
+                      ),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: InputDecorator(
+                          decoration: _decoration.copyWith(
+                            labelText: "Pick Icon and Color for the group",
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 5),
+                                child: Row(
+                                  children: <Widget>[
+                                    const Flexible(
+                                      child: Text(
+                                        "Icon and Color Selected",
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.black),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 12),
+                                      child: Icon(
+                                        _icon,
+                                        size: 27,
+                                        color: _color,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 7),
+                                child: InputDecorator(
+                                  decoration: _decoration.copyWith(
+                                      labelText: "Group Icon"),
+                                  child: Scrollbar(
+                                    child: SizedBox(
+                                      height: 120,
+                                      child: SingleChildScrollView(
+                                          child: IconPicker(
+                                        selected: _icon,
+                                        color: _color,
+                                        onSelect: (icon) {
+                                          setState(() {
+                                            _icon = icon;
+                                          });
+                                        },
+                                      )),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 7),
-                              child: InputDecorator(
-                                decoration: _decoration.copyWith(
-                                    labelText: "Group Color"),
-                                child: Scrollbar(
-                                  child: SizedBox(
-                                    height: 120,
-                                    child: SingleChildScrollView(
-                                      child: ColorPicker(
-                                        selected: _color,
-                                        onSelect: (col) {
-                                          setState(() {
-                                            _color = col;
-                                          });
-                                        },
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 7),
+                                child: InputDecorator(
+                                  decoration: _decoration.copyWith(
+                                      labelText: "Group Color"),
+                                  child: Scrollbar(
+                                    child: SizedBox(
+                                      height: 120,
+                                      child: SingleChildScrollView(
+                                        child: ColorPicker(
+                                          selected: _color,
+                                          onSelect: (col) {
+                                            setState(() {
+                                              _color = col;
+                                            });
+                                          },
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 27, right: 27),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: RaisedButton(
-                              disabledColor: const Color(0xFFE0D4B9),
-                              color: const Color(0xFFE0D4B9),
-                              onPressed: () {
-                                if (_name == null || _name.isEmpty) {
-                                  setState(() {
-                                    showErrorMessage(
-                                        'Please provide the new group name.');
-                                  });
-                                } else if (!_isUpdating &&
-                                    categoriesProvider
-                                        .searchCategoryByName(_name)) {
-                                  setState(() {
-                                    showErrorMessage(
-                                        'The group name you provided is already in use. Pleae enter a new group name.');
-                                  });
-                                } else {
-                                  if (_isUpdating) {
-                                    categoriesProvider.update(
-                                        widget.category,
-                                        CategoryModel(
-                                            color: _color,
-                                            name: _name,
-                                            icon: _icon));
-                                  } else {
-                                    categoriesProvider.add(CategoryModel(
-                                        color: _color,
-                                        name: _name,
-                                        icon: _icon));
+                            ],
+                          ),
+                        )),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 27, right: 27),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: RaisedButton(
+                                disabledColor: const Color(0xFFE0D4B9),
+                                color: const Color(0xFFE0D4B9),
+                                onPressed: () {
+                                  if (_formKey.currentState.validate()) {
+                                    if (_isUpdating) {
+                                      categoriesProvider.update(
+                                          widget.category,
+                                          CategoryModel(
+                                              color: _color,
+                                              name: _name,
+                                              icon: _icon));
+                                    } else {
+                                      categoriesProvider.add(CategoryModel(
+                                          color: _color,
+                                          name: _name,
+                                          icon: _icon));
+                                    }
+                                    _name = "";
+                                    _color = ColorPicker.colors[0];
+                                    _icon = IconPicker.icons[0];
+                                    Navigator.of(context).pop();
                                   }
-                                  _name = "";
-                                  _color = ColorPicker.colors[0];
-                                  _icon = IconPicker.icons[0];
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              child: _isUpdating
-                                  ? const Text("Update")
-                                  : const Text("Add"),
+                                },
+                                child: _isUpdating
+                                    ? const Text("Update")
+                                    : const Text("Add"),
+                              ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: RaisedButton(
-                              color: const Color(0xFFE0D4B9),
-                              onPressed: () {
-                                goBack(context);
-                              },
-                              child: const Text("Cancel"),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: RaisedButton(
+                                color: const Color(0xFFE0D4B9),
+                                onPressed: () {
+                                  goBack(context);
+                                },
+                                child: const Text("Cancel"),
+                              ),
                             ),
-                          ),
-                        )
-                      ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

@@ -13,11 +13,11 @@ class HabitModel {
       @required this.last});
 
   String name;
-  String note;
+  String description;
   DateTime start;
   DateTime end;
   CategoryModel category;
   Task upcomming;
   Task last;
-  List<Task> tasks;
+  List<String> recurrence;
 }

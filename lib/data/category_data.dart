@@ -46,6 +46,7 @@ class CategoryData with ChangeNotifier {
             category.name.toLowerCase().trim() == name.toLowerCase()) !=
         -1;
   }
+  
 }
 
 class DuplicateDataException implements Exception {

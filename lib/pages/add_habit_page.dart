@@ -11,8 +11,9 @@ class AddHabitPage extends StatefulWidget {
 }
 
 class _AddHabitPageState extends State<AddHabitPage> {
-  HabitModel habit;
   CategoryModel _category;
+
+  HabitModel _habit;
   TextEditingController _startDateController;
   TextEditingController _endDateController;
   TextEditingController _nameController;
@@ -29,41 +30,42 @@ class _AddHabitPageState extends State<AddHabitPage> {
       borderRadius: BorderRadius.circular(5),
     ),
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-    labelStyle: TextStyle(color: Colors.black),
+    labelStyle: const TextStyle(color: Colors.black),
   );
-
-  static final DateFormat _dateFormat = DateFormat("MM/dd/yyyy");
+  static final _dateFormatter = DateFormat("MM/dd/yyyy");
   static final _now = DateTime.now();
   static final _firstDate = _now.subtract(const Duration(days: 1));
   static final _lastDate = DateTime(_now.year + 50, _now.month, _now.day);
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _category = null;
-    habit = HabitModel(
+    _habit = HabitModel(
         name: "",
         start: _now,
         end: DateTime.now(),
         category: _category,
         upcomming: null,
         last: null)
-      ..note = "";
+      ..description = "";
+
     _startDateController = TextEditingController();
     _endDateController = TextEditingController();
     _nameController = TextEditingController();
     _noteController = TextEditingController();
 
-    _nameController.text = habit.name;
-    _startDateController.text = _dateFormat.format(habit.start);
-    _endDateController.text = _dateFormat.format(habit.end);
-    _noteController.text = habit.note;
+    _nameController.text = _habit.name;
+    _startDateController.text = _dateFormatter.format(_habit.start);
+    _endDateController.text = _dateFormatter.format(_habit.end);
+    _noteController.text = _habit.description;
 
     _noteController.addListener(() {
-      habit.note = _noteController.text;
+      _habit.description = _noteController.text;
     });
     _nameController.addListener(() {
-      habit.name = _nameController.text;
+      _habit.name = _nameController.text;
     });
   }
 
@@ -79,7 +81,8 @@ class _AddHabitPageState extends State<AddHabitPage> {
   @override
   Widget build(BuildContext context) {
     _category = ModalRoute.of(context).settings.arguments as CategoryModel;
-    habit.category = _category;
+    _habit.category = _category;
+
     return Scaffold(
       backgroundColor: const Color(0xFFE0D4B9),
       appBar: AppBar(
@@ -102,161 +105,175 @@ class _AddHabitPageState extends State<AddHabitPage> {
           onPressed: () => cancel(context),
         ),
       ),
-      body: ListView(
-        children: <Widget>[
-          Padding(
-            padding:
-                const EdgeInsets.only(left: 21, right: 21, top: 12, bottom: 7),
-            child: Card(
-              color: const Color(0xFFF2EBDA),
-              child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 12, right: 12, top: 7, bottom: 7),
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: TextFormField(
-                                controller: _nameController,
-                                validator: (value) {
-                                  // validation logic
-                                },
-                                decoration: _decoration.copyWith(
-                                  labelText: "Habit Name",
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      Icons.clear,
-                                      color: Colors.redAccent,
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 21, right: 21, top: 12, bottom: 7),
+              child: Card(
+                color: const Color(0xFFF2EBDA),
+                child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 12, right: 12, top: 7, bottom: 7),
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _nameController,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Habit name can't be empty";
+                                    }
+                                    return null;
+                                  },
+                                  decoration: _decoration.copyWith(
+                                    labelText: "Habit Name",
+                                    errorStyle: TextStyle(color: Colors.red),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        Icons.clear,
+                                        color: Colors.redAccent,
+                                      ),
+                                      onPressed: () {
+                                        _nameController.text = "";
+                                      },
                                     ),
-                                    onPressed: () {
-                                      _nameController.text = "";
-                                    },
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 12),
-                                child: TextFormField(
-                                  onTap: () async {
-                                    final pickedStartDate =
-                                        await showDatePicker(
-                                      context: context,
-                                      firstDate: _firstDate,
-                                      lastDate: _lastDate,
-                                      initialDate: habit.start,
-                                    );
-                                    if (pickedStartDate != null) {
-                                      habit.start = pickedStartDate;
-                                      _startDateController.text =
-                                          _dateFormat.format(pickedStartDate);
-                                      if (habit.start.isAfter(habit.end)) {
-                                        habit.end = habit.start;
-                                        _endDateController.text =
-                                            _dateFormat.format(habit.end);
-                                      }
-                                    }
-                                  },
-                                  readOnly: true,
-                                  controller: _startDateController,
-                                  decoration: _decoration.copyWith(
-                                      labelText: "Start Date",
-                                      suffixIcon: null),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: TextFormField(
-                                  readOnly: true,
-                                  controller: _endDateController,
-                                  onTap: () async {
-                                    final pickedEndDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: habit.end,
-                                      firstDate: habit.start,
-                                      lastDate: _lastDate,
-                                    );
-
-                                    if (pickedEndDate != null) {
-                                      _endDateController.text =
-                                          _dateFormat.format(pickedEndDate);
-                                      habit.end = pickedEndDate;
-                                    }
-                                  },
-                                  decoration: _decoration.copyWith(
-                                      labelText: "End Date", suffixIcon: null),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      RepeatInputField(),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: TextFormField(
-                                maxLines: 4,
-                                controller: _noteController,
-                                decoration: _decoration.copyWith(
-                                  labelText: "Note",
-                                  alignLabelWithHint: true
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 27),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
                             children: <Widget>[
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(7),
-                                  child: RaisedButton(
-                                    color: const Color(0xFFE0D4B9),
-                                    onPressed: () {},
-                                    child: const Text("Add"),
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: TextFormField(
+                                    onTap: () async {
+                                      final pickedStartDate =
+                                          await showDatePicker(
+                                        context: context,
+                                        firstDate: _firstDate,
+                                        lastDate: _lastDate,
+                                        initialDate: _habit.start,
+                                      );
+                                      if (pickedStartDate != null) {
+                                        _habit.start = pickedStartDate;
+                                        _startDateController.text =
+                                            _dateFormatter
+                                                .format(pickedStartDate);
+                                        if (_habit.start.isAfter(_habit.end)) {
+                                          _habit.end = _habit.start;
+                                          _endDateController.text =
+                                              _dateFormatter.format(_habit.end);
+                                        }
+                                      }
+                                    },
+                                    readOnly: true,
+                                    controller: _startDateController,
+                                    decoration: _decoration.copyWith(
+                                        labelText: "Start Date",
+                                        suffixIcon: null),
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(7),
-                                  child: RaisedButton(
-                                    color: const Color(0xFFE0D4B9),
-                                    onPressed: () {},
-                                    child: const Text("Cancel"),
+                                  padding: const EdgeInsets.only(left: 12),
+                                  child: TextFormField(
+                                    readOnly: true,
+                                    controller: _endDateController,
+                                    onTap: () async {
+                                      final pickedEndDate =
+                                          await showDatePicker(
+                                        context: context,
+                                        initialDate: _habit.end,
+                                        firstDate: _habit.start,
+                                        lastDate: _lastDate,
+                                      );
+
+                                      if (pickedEndDate != null) {
+                                        _endDateController.text = _dateFormatter
+                                            .format(pickedEndDate);
+                                        _habit.end = pickedEndDate;
+                                      }
+                                    },
+                                    decoration: _decoration.copyWith(
+                                        labelText: "End Date",
+                                        suffixIcon: null),
                                   ),
                                 ),
                               )
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  )),
+                        RepeatInputField(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: TextFormField(
+                                  maxLines: 4,
+                                  controller: _noteController,
+                                  decoration: _decoration.copyWith(
+                                      labelText: "Note",
+                                      alignLabelWithHint: true),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 27),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(7),
+                                    child: RaisedButton(
+                                      color: const Color(0xFFE0D4B9),
+                                      onPressed: () {
+                                        if (_formKey.currentState.validate()) {
+
+                                          
+                                        }
+                                      },
+                                      child: const Text("Add"),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(7),
+                                    child: RaisedButton(
+                                      color: const Color(0xFFE0D4B9),
+                                      onPressed: () {},
+                                      child: const Text("Cancel"),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -276,7 +293,7 @@ class RepeatInputField extends StatefulWidget {
       borderRadius: BorderRadius.circular(5),
     ),
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-    labelStyle: TextStyle(color: Colors.black),
+    labelStyle: const TextStyle(color: Colors.black),
   );
 
   @override
