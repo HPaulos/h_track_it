@@ -9,32 +9,18 @@ import '../model/task.dart';
 class HabitData extends ChangeNotifier {
   final List<HabitModel> _habits = [
     HabitModel(
-      end: DateTime.now(),
-      start: DateTime.now(),
-      name: "Drink Water",
-      upcomming: Task(
-          dateTime: DateTime.now(),
-          duration: const Duration(hours: 1),
-          status: Status.pending),
-      last: Task(
-          dateTime: DateTime.now(),
-          duration: const Duration(hours: 1),
-          status: Status.pending),
-      category: CategoryModel(
-          name: 'Health', color: Colors.red, icon: FontAwesomeIcons.solidHeart),
-    ),
+        end: DateTime.now(),
+        start: DateTime.now(),
+        name: "Drink Water",
+        category: CategoryModel(
+            name: 'Health',
+            color: Colors.red,
+            icon: FontAwesomeIcons.solidHeart)),
+
     HabitModel(
       end: DateTime.now(),
       start: DateTime.now(),
       name: "Read Bible",
-      upcomming: Task(
-          dateTime: DateTime.now(),
-          duration: const Duration(hours: 1),
-          status: Status.pending),
-      last: Task(
-          dateTime: DateTime.now(),
-          duration: const Duration(hours: 1),
-          status: Status.pending),
       category: CategoryModel(
           name: 'Spritual', color: Colors.green, icon: FontAwesomeIcons.pray),
     ),
@@ -42,14 +28,6 @@ class HabitData extends ChangeNotifier {
       end: DateTime.now(),
       start: DateTime.now(),
       name: "Read 100 pages",
-      upcomming: Task(
-          dateTime: DateTime.now(),
-          duration: const Duration(hours: 1),
-          status: Status.pending),
-      last: Task(
-          dateTime: DateTime.now(),
-          duration: const Duration(hours: 1),
-          status: Status.pending),
       category: CategoryModel(
           name: 'Reading',
           color: Colors.amber,
@@ -70,6 +48,4 @@ class HabitData extends ChangeNotifier {
     _habits.insert(0, habit);
     notifyListeners();
   }
-
-  
 }

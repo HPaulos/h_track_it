@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../data/habits_data.dart';
 import '../model/category.dart';
 import '../model/habit.dart';
 
@@ -11,9 +13,6 @@ class AddHabitPage extends StatefulWidget {
 }
 
 class _AddHabitPageState extends State<AddHabitPage> {
-  CategoryModel _category;
-
-  HabitModel _habit;
   TextEditingController _startDateController;
   TextEditingController _endDateController;
   TextEditingController _nameController;
@@ -32,24 +31,27 @@ class _AddHabitPageState extends State<AddHabitPage> {
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
     labelStyle: const TextStyle(color: Colors.black),
   );
+
   static final _dateFormatter = DateFormat("MM/dd/yyyy");
   static final _now = DateTime.now();
   static final _firstDate = _now.subtract(const Duration(days: 1));
   static final _lastDate = DateTime(_now.year + 50, _now.month, _now.day);
   final _formKey = GlobalKey<FormState>();
 
+  CategoryModel _category;
+  HabitModel _habit;
+  String _recurssion;
+
   @override
   void initState() {
     super.initState();
     _category = null;
     _habit = HabitModel(
-        name: "",
-        start: _now,
-        end: DateTime.now(),
-        category: _category,
-        upcomming: null,
-        last: null)
-      ..description = "";
+      name: "",
+      start: _now,
+      end: DateTime.now(),
+      category: _category,
+    )..description = "";
 
     _startDateController = TextEditingController();
     _endDateController = TextEditingController();
@@ -80,8 +82,12 @@ class _AddHabitPageState extends State<AddHabitPage> {
 
   @override
   Widget build(BuildContext context) {
+    final habitProvider = Provider.of<HabitData>(context, listen: true);
+
     _category = ModalRoute.of(context).settings.arguments as CategoryModel;
     _habit.category = _category;
+
+    final repeatInputField = RepeatInputField();
 
     return Scaffold(
       backgroundColor: const Color(0xFFE0D4B9),
@@ -216,7 +222,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                             ],
                           ),
                         ),
-                        RepeatInputField(),
+                        repeatInputField,
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
@@ -245,9 +251,10 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                     child: RaisedButton(
                                       color: const Color(0xFFE0D4B9),
                                       onPressed: () {
-                                        if (_formKey.currentState.validate()) {
-
-                                          
+                                        final rule = repeatInputField
+                                            .getRecurrenceRule();
+                                        if(_formKey.currentState.validate()){
+                                           //TODO call form validator on repeate input 
                                         }
                                       },
                                       child: const Text("Add"),
@@ -295,39 +302,54 @@ class RepeatInputField extends StatefulWidget {
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
     labelStyle: const TextStyle(color: Colors.black),
   );
+  _RepeatInputFieldState _state;
+  RepeatInputField();
 
   @override
-  _RepeatInputFieldState createState() => _RepeatInputFieldState();
+  _RepeatInputFieldState createState() {
+    return _RepeatInputFieldState();
+  }
+
+  String getRecurrenceRule() {
+    return _state.getRecurrenceRule();
+  }
+
+  String validate() {
+    return _state.validat();
+  }
 }
 
 class _RepeatInputFieldState extends State<RepeatInputField> {
   static final _now = DateTime.now();
   static final _firstDate = _now.subtract(const Duration(days: 1));
   static final _lastDate = DateTime(_now.year + 50, _now.month, _now.day);
-  final DateFormat _timeFormatter = DateFormat.jm();
-  final DateFormat _dateFormatter = DateFormat("MM/dd/yyyy");
+  static final DateFormat _timeFormatter = DateFormat.jm();
+  static final DateFormat _dateFormatter = DateFormat("MM/dd/yyyy");
   TextEditingController _repeatTermController;
   TextEditingController _timeController;
   TextEditingController _dateController;
 
-  int _repeatCount;
+  int _repeatInterval;
   String _repeatTerm;
   TimeOfDay _time;
   DateTime _date;
+  List<String> _byDay;
 
   @override
   void initState() {
     super.initState();
+    widget._state = this;
+    _byDay = [];
     _repeatTerm = "Day";
-    _repeatCount = 1;
+    _repeatInterval = 1;
     _repeatTermController = TextEditingController();
     _dateController = TextEditingController();
     _time = TimeOfDay.now();
     _date = DateTime.now();
     _repeatTermController.addListener(() {
-      _repeatCount = int.parse(_repeatTermController.text);
+      _repeatInterval = int.parse(_repeatTermController.text);
     });
-    _repeatTermController.text = _repeatCount.toString();
+    _repeatTermController.text = _repeatInterval.toString();
     _timeController = TextEditingController();
     _timeController.text = formatTimeOfDay(_time);
     _dateController.text = _dateFormatter.format(_date);
@@ -504,14 +526,32 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
             Visibility(
               visible: _repeatTerm == "Week",
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                child: Row(
-                  children: ["M", "T", "W", "T", "F", "S", "S"]
-                      .map((day) => Expanded(
-                          child: Padding(
-                              padding: const EdgeInsets.all(3),
-                              child: CircularButton(day))))
-                      .toList(),
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <String, String>{
+                        "MO": "M",
+                        "TH": "T",
+                        "WE": "W",
+                        "TH": "T",
+                        "FR": "F",
+                        "SA": "S",
+                        "SU": "S"
+                      }
+                          .entries
+                          .map((entry) => CircularButton(
+                              value: entry.value,
+                              onSelect: () {
+                                _byDay.add(entry.key);
+                              },
+                              onUnselect: () {
+                                _byDay.remove(entry.key);
+                              }))
+                          .toList()),
                 ),
               ),
             )
@@ -520,11 +560,56 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
       ),
     );
   }
+
+  String validat() {
+    String message = null;
+
+    if (_repeatInterval <= 0) {
+      message = "Invalid repeate interval.";
+    }
+
+    if (_repeatTerm.compareTo("Week") == 0 && _byDay.isEmpty) {
+      message = "Please pick at least one week day.";
+    }
+
+    return message;
+  }
+
+  String getRecurrenceRule() {
+    String freq = "";
+    switch (_repeatTerm) {
+      case "Day":
+        freq =
+            "RRULE:FREQ=DAILY;TIME=${formatTimeOfDay(_time)};INTERVAL=${_repeatInterval}";
+        break;
+      case "Week":
+        freq =
+            "RRULE:FREQ=WEEKLY;TIME=${formatTimeOfDay(_time)};BYDAY=${_byDay.join(',')};INTERVAL=${_repeatInterval}";
+        break;
+      case "Year":
+        freq =
+            "RRULE:FREQ=YEARLY;TIME=${formatTimeOfDay(_time)};;BYDATE=${_dateFormatter.format(_date)}";
+        break;
+      case "Month":
+        freq =
+            "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(_time)};BYDATE=${_dateFormatter.format(_date)}";
+        break;
+      case "Last Day of a Month":
+        freq = "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(_time)};BYDATE=LAST";
+        break;
+    }
+    return freq;
+  }
 }
 
 class CircularButton extends StatefulWidget {
-  const CircularButton(String label) : _label = label;
+  const CircularButton({String value, Function onSelect, Function onUnselect})
+      : _label = value,
+        _onSelect = onSelect,
+        _onUnselect = onUnselect;
 
+  final Function _onSelect;
+  final Function _onUnselect;
   final String _label;
 
   @override
@@ -542,17 +627,32 @@ class _CircularButtonState extends State<CircularButton> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialButton(
-      elevation: 5,
-      padding: const EdgeInsets.all(3),
-      shape: const CircleBorder(),
-      color: _isSelected ? const Color(0xFFFC9C35) : const Color(0xFFE0D4B9),
-      onPressed: () {
-        setState(() {
-          _isSelected = !_isSelected;
-        });
-      },
-      child: Center(child: Text(widget._label)),
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: ClipOval(
+        child: Material(
+          elevation: 5,
+          color:
+              _isSelected ? const Color(0xFFFC9C35) : const Color(0xFFE0D4B9),
+          child: InkWell(
+            splashColor: const Color(0xFFFC9C35),
+            onTap: () {
+              setState(() {
+                _isSelected = !_isSelected;
+                if (_isSelected) {
+                  widget._onSelect();
+                } else {
+                  widget._onUnselect();
+                }
+              });
+            }, // inkwell color
+            child: SizedBox(
+                width: 41,
+                height: 41,
+                child: Center(child: Text(widget._label))),
+          ),
+        ),
+      ),
     );
   }
 }

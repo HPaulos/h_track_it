@@ -174,18 +174,18 @@ class _HabitListPageState extends State<HabitListPage> {
 class HabitItem extends StatelessWidget {
   HabitItem(HabitModel habitModel)
       : _name = habitModel.name,
-        _upcommingTime = DateFormat.MEd().format(habitModel.upcomming.dateTime),
-        _startDate = DateFormat.MEd().format(habitModel.start),
-        _endDate = DateFormat.MEd().format(habitModel.end),
+        _upcommingDate = DateFormat.MEd().format(habitModel.upcomming),
+        _start = DateFormat.MEd().format(habitModel.start),
+        _end = DateFormat.MEd().format(habitModel.end),
         _color = habitModel.category.color,
         _icon = habitModel.category.icon,
         _completed = 1,
         _total = 1;
 
   final String _name;
-  final String _upcommingTime;
-  final String _startDate;
-  final String _endDate;
+  final String _upcommingDate;
+  final String _start;
+  final String _end;
   final Color _color;
   final IconData _icon;
   final int _completed;
@@ -249,7 +249,7 @@ class HabitItem extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  _upcommingTime ?? "no upcomming task",
+                                  _upcommingDate ?? "no upcomming task",
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),
@@ -270,14 +270,14 @@ class HabitItem extends StatelessWidget {
                                 const Padding(
                                   padding: EdgeInsets.only(bottom: 3, top: 3),
                                   child: Text(
-                                    "Start Date",
+                                    "Previous Date",
                                     style: TextStyle(
                                       fontSize: 12,
                                     ),
                                   ),
                                 ),
                                 Text(
-                                  _startDate,
+                                  _start,
                                   style: const TextStyle(
                                     fontSize: 19,
                                   ),
@@ -292,14 +292,14 @@ class HabitItem extends StatelessWidget {
                                 const Padding(
                                   padding: EdgeInsets.only(bottom: 3, top: 3),
                                   child: Text(
-                                    "End Date",
+                                    "Next Date",
                                     style: TextStyle(
                                       fontSize: 12,
                                     ),
                                   ),
                                 ),
                                 Text(
-                                  _endDate,
+                                  _end,
                                   style: const TextStyle(
                                     fontSize: 19,
                                   ),

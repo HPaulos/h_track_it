@@ -7,7 +7,7 @@ import '../model/category.dart';
 class CategoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final categoriesProvider = Provider.of<CategoryData>(context);
+    final categoriesProvider = Provider.of<CategoryData>(context, listen: true);
 
     return Scaffold(
       backgroundColor: const Color(0xFFE0D4B9),
@@ -134,8 +134,7 @@ class Category extends StatelessWidget {
               });
             },
             onTap: () {
-              Navigator.pushNamed(context, _gotToPage,
-                  arguments: _category);
+              Navigator.pushNamed(context, _gotToPage, arguments: _category);
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

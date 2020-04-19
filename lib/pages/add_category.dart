@@ -102,7 +102,8 @@ class AddCategoryFormState extends State<AddCategoryForm> {
 
   @override
   Widget build(BuildContext context) {
-    final categoriesProvider = Provider.of<CategoryData>(context, listen: true);
+    final categoriesProvider =
+        Provider.of<CategoryData>(context, listen: false);
 
     return ListView(
       children: <Widget>[
