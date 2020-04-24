@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +42,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
 
   CategoryModel _category;
   HabitModel _habit;
-  String _recurssion;
 
   @override
   void initState() {
@@ -86,8 +87,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
 
     _category = ModalRoute.of(context).settings.arguments as CategoryModel;
     _habit.category = _category;
-
-    final repeatInputField = RepeatInputField();
 
     return Scaffold(
       backgroundColor: const Color(0xFFE0D4B9),
@@ -222,7 +221,12 @@ class _AddHabitPageState extends State<AddHabitPage> {
                             ],
                           ),
                         ),
-                        repeatInputField,
+                        RepeateInputFormField(
+                          autovalidate: true,
+                          onSaved: (rec) {
+                            _habit.recurrence = rec.getRecurrenceRule();
+                          },
+                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
@@ -251,10 +255,9 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                     child: RaisedButton(
                                       color: const Color(0xFFE0D4B9),
                                       onPressed: () {
-                                        final rule = repeatInputField
-                                            .getRecurrenceRule();
-                                        if(_formKey.currentState.validate()){
-                                           //TODO call form validator on repeate input 
+                                        if (_formKey.currentState.validate()) {
+                                          habitProvider.add(_habit);
+                                          Navigator.pop(context);
                                         }
                                       },
                                       child: const Text("Add"),
@@ -288,7 +291,71 @@ class _AddHabitPageState extends State<AddHabitPage> {
   bool cancel(BuildContext context) => Navigator.of(context).pop();
 }
 
-class RepeatInputField extends StatefulWidget {
+class RepeateInputFormField extends FormField<RepeatRecursionModel> {
+  RepeateInputFormField(
+      {FormFieldSetter<RepeatRecursionModel> onSaved,
+      bool autovalidate = false})
+      : super(
+            initialValue: RepeatRecursionModel(
+                term: "Day",
+                interval: 1,
+                date: DateTime.now(),
+                time: TimeOfDay.now(),
+                byDay: []),
+            onSaved: onSaved,
+            validator: (recurssion) {
+              String message;
+
+              if (recurssion.interval <= 0) {
+                message = "Invalid repeate interval.";
+              }
+
+              if (recurssion.term.compareTo("Week") == 0 &&
+                  recurssion.byDay.isEmpty) {
+                message = "Please pick at least one week day.";
+              }
+
+              return message;
+            },
+            autovalidate: autovalidate,
+            builder: (state) {
+              return Column(
+                children: <Widget>[
+                  RepeateInputFormWidget(
+                    onUpdate: (value) {
+                      state.didChange(value);
+                    },
+                    intial: state.value,
+                  ),
+                  Visibility(
+                    visible: state.errorText != null,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 7),
+                      child: Row(
+                        children: <Widget>[
+                          Text(
+                            state.errorText ?? "",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              );
+            });
+}
+
+class RepeateInputFormWidget extends StatefulWidget {
+  RepeateInputFormWidget(
+      {@required Function(RepeatRecursionModel) onUpdate,
+      @required RepeatRecursionModel intial})
+      : _onUpdate = onUpdate,
+        _intial = intial;
+
   static final InputDecoration _decoration = InputDecoration(
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(5),
@@ -302,12 +369,13 @@ class RepeatInputField extends StatefulWidget {
     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
     labelStyle: const TextStyle(color: Colors.black),
   );
-  _RepeatInputFieldState _state;
-  RepeatInputField();
+  _RepeateInputFormWidgetState _state;
 
+  Function(RepeatRecursionModel) _onUpdate;
+  RepeatRecursionModel _intial;
   @override
-  _RepeatInputFieldState createState() {
-    return _RepeatInputFieldState();
+  _RepeateInputFormWidgetState createState() {
+    return _RepeateInputFormWidgetState();
   }
 
   String getRecurrenceRule() {
@@ -319,7 +387,52 @@ class RepeatInputField extends StatefulWidget {
   }
 }
 
-class _RepeatInputFieldState extends State<RepeatInputField> {
+class RepeatRecursionModel {
+  static final DateFormat _dateFormatter = DateFormat("MM/dd/yyyy");
+  RepeatRecursionModel(
+      {this.interval, this.term, this.time, this.date, this.byDay = const []});
+
+  int interval;
+  String term;
+  TimeOfDay time;
+  DateTime date;
+  List<String> byDay;
+
+  String formatTimeOfDay(TimeOfDay tod) {
+    final now = DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
+    final format = DateFormat.jm();
+    return format.format(dt);
+  }
+
+  String getRecurrenceRule() {
+    String freq = "";
+    switch (term) {
+      case "Day":
+        freq =
+            "RRULE:FREQ=DAILY;TIME=${formatTimeOfDay(time)};INTERVAL=${interval}";
+        break;
+      case "Week":
+        freq =
+            "RRULE:FREQ=WEEKLY;TIME=${formatTimeOfDay(time)};BYDAY=${byDay.join(',')};INTERVAL=${interval}";
+        break;
+      case "Year":
+        freq =
+            "RRULE:FREQ=YEARLY;TIME=${formatTimeOfDay(time)};BYDATE=${_dateFormatter.format(date)}";
+        break;
+      case "Month":
+        freq =
+            "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(time)};BYDATE=${_dateFormatter.format(date)}";
+        break;
+      case "Last Day of a Month":
+        freq = "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(time)};BYDATE=LAST";
+        break;
+    }
+    return freq;
+  }
+}
+
+class _RepeateInputFormWidgetState extends State<RepeateInputFormWidget> {
   static final _now = DateTime.now();
   static final _firstDate = _now.subtract(const Duration(days: 1));
   static final _lastDate = DateTime(_now.year + 50, _now.month, _now.day);
@@ -328,31 +441,24 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
   TextEditingController _repeatTermController;
   TextEditingController _timeController;
   TextEditingController _dateController;
-
-  int _repeatInterval;
-  String _repeatTerm;
-  TimeOfDay _time;
-  DateTime _date;
-  List<String> _byDay;
+  RepeatRecursionModel recurssion;
 
   @override
   void initState() {
     super.initState();
     widget._state = this;
-    _byDay = [];
-    _repeatTerm = "Day";
-    _repeatInterval = 1;
+
+    recurssion = widget._intial;
+
     _repeatTermController = TextEditingController();
     _dateController = TextEditingController();
-    _time = TimeOfDay.now();
-    _date = DateTime.now();
     _repeatTermController.addListener(() {
-      _repeatInterval = int.parse(_repeatTermController.text);
+      recurssion.interval = int.parse(_repeatTermController.text);
     });
-    _repeatTermController.text = _repeatInterval.toString();
+    _repeatTermController.text = recurssion.interval.toString();
     _timeController = TextEditingController();
-    _timeController.text = formatTimeOfDay(_time);
-    _dateController.text = _dateFormatter.format(_date);
+    _timeController.text = formatTimeOfDay(recurssion.time);
+    _dateController.text = _dateFormatter.format(recurssion.date);
   }
 
   @override
@@ -364,7 +470,7 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
   String formatTimeOfDay(TimeOfDay tod) {
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, tod.hour, tod.minute);
-    final format = DateFormat.jm(); //"6:00 AM"
+    final format = DateFormat.jm();
     return format.format(dt);
   }
 
@@ -373,8 +479,8 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: InputDecorator(
-        decoration:
-            RepeatInputField._decoration.copyWith(labelText: "Repeats Every"),
+        decoration: RepeateInputFormWidget._decoration
+            .copyWith(labelText: "Repeats Every"),
         child: Column(
           children: <Widget>[
             Row(
@@ -415,7 +521,7 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
                               borderRadius: BorderRadius.circular(3))),
                       child: DropdownButton<String>(
                           focusColor: const Color(0xFFF2EBDA),
-                          value: _repeatTerm,
+                          value: recurssion.term,
                           isExpanded: true,
                           items: <String>[
                             'Day',
@@ -431,7 +537,8 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
                           }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              _repeatTerm = value;
+                              recurssion.term = value;
+                              widget._onUpdate(recurssion);
                             });
                           }),
                     ),
@@ -455,9 +562,11 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
                             final time = await showTimePicker(
                                 context: context, initialTime: TimeOfDay.now());
                             if (time != null) {
-                              _time = time;
-                              _timeController.text = formatTimeOfDay(_time);
+                              recurssion.time = time;
+                              _timeController.text =
+                                  formatTimeOfDay(recurssion.time);
                             }
+                            widget._onUpdate(recurssion);
                           },
                           decoration: InputDecoration(
                             labelText: "Time",
@@ -479,7 +588,8 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
                     ),
                   ),
                   Visibility(
-                    visible: _repeatTerm == "Month" || _repeatTerm == "Year",
+                    visible:
+                        recurssion.term == "Month" || recurssion.term == "Year",
                     child: Expanded(
                       child: Center(
                         child: Padding(
@@ -499,6 +609,8 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
                                 _dateController.text =
                                     _dateFormatter.format(date);
                               }
+
+                              widget._onUpdate(recurssion);
                             },
                             decoration: InputDecoration(
                               labelText: "Date",
@@ -524,7 +636,7 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
               ),
             ),
             Visibility(
-              visible: _repeatTerm == "Week",
+              visible: recurssion.term == "Week",
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3),
                 child: SingleChildScrollView(
@@ -546,10 +658,12 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
                           .map((entry) => CircularButton(
                               value: entry.value,
                               onSelect: () {
-                                _byDay.add(entry.key);
+                                recurssion.byDay.add(entry.key);
+                                widget._onUpdate(recurssion);
                               },
                               onUnselect: () {
-                                _byDay.remove(entry.key);
+                                recurssion.byDay.remove(entry.key);
+                                widget._onUpdate(recurssion);
                               }))
                           .toList()),
                 ),
@@ -564,11 +678,11 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
   String validat() {
     String message = null;
 
-    if (_repeatInterval <= 0) {
+    if (recurssion.interval <= 0) {
       message = "Invalid repeate interval.";
     }
 
-    if (_repeatTerm.compareTo("Week") == 0 && _byDay.isEmpty) {
+    if (recurssion.term.compareTo("Week") == 0 && recurssion.byDay.isEmpty) {
       message = "Please pick at least one week day.";
     }
 
@@ -577,25 +691,26 @@ class _RepeatInputFieldState extends State<RepeatInputField> {
 
   String getRecurrenceRule() {
     String freq = "";
-    switch (_repeatTerm) {
+    switch (recurssion.term) {
       case "Day":
         freq =
-            "RRULE:FREQ=DAILY;TIME=${formatTimeOfDay(_time)};INTERVAL=${_repeatInterval}";
+            "RRULE:FREQ=DAILY;TIME=${formatTimeOfDay(recurssion.time)};INTERVAL=${recurssion.interval}";
         break;
       case "Week":
         freq =
-            "RRULE:FREQ=WEEKLY;TIME=${formatTimeOfDay(_time)};BYDAY=${_byDay.join(',')};INTERVAL=${_repeatInterval}";
+            "RRULE:FREQ=WEEKLY;TIME=${formatTimeOfDay(recurssion.time)};BYDAY=${recurssion.byDay.join(',')};INTERVAL=${recurssion.interval}";
         break;
       case "Year":
         freq =
-            "RRULE:FREQ=YEARLY;TIME=${formatTimeOfDay(_time)};;BYDATE=${_dateFormatter.format(_date)}";
+            "RRULE:FREQ=YEARLY;TIME=${formatTimeOfDay(recurssion.time)};BYDATE=${_dateFormatter.format(recurssion.date)}";
         break;
       case "Month":
         freq =
-            "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(_time)};BYDATE=${_dateFormatter.format(_date)}";
+            "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(recurssion.time)};BYDATE=${_dateFormatter.format(recurssion.date)}";
         break;
       case "Last Day of a Month":
-        freq = "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(_time)};BYDATE=LAST";
+        freq =
+            "RRULE:FREQ=MONTHLY;TIME=${formatTimeOfDay(recurssion.time)};BYDATE=LAST";
         break;
     }
     return freq;

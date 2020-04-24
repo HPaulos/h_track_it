@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:track_it/data/trackit_theme_data.dart';
 import '../data/category_data.dart';
 import '../model/category.dart';
 
@@ -27,10 +28,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
     }
 
     return Scaffold(
-        backgroundColor: const Color(0xFFE0D4B9),
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.clear, color: Colors.black),
+            icon: const Icon(Icons.clear),
             onPressed: () => goBack(context),
           ),
           title: const Text("New Group"),
@@ -113,7 +113,6 @@ class AddCategoryFormState extends State<AddCategoryForm> {
           child: Form(
             key: _formKey,
             child: Card(
-              color: const Color(0xFFF2EBDA),
               child: Padding(
                 padding: const EdgeInsets.only(
                     left: 12, right: 12, top: 7, bottom: 7),
@@ -252,8 +251,6 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                             child: Padding(
                               padding: const EdgeInsets.all(12),
                               child: RaisedButton(
-                                disabledColor: const Color(0xFFE0D4B9),
-                                color: const Color(0xFFE0D4B9),
                                 onPressed: () {
                                   if (_formKey.currentState.validate()) {
                                     if (_isUpdating) {
@@ -285,7 +282,6 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                             child: Padding(
                               padding: const EdgeInsets.all(12),
                               child: RaisedButton(
-                                color: const Color(0xFFE0D4B9),
                                 onPressed: () {
                                   goBack(context);
                                 },
@@ -307,43 +303,6 @@ class AddCategoryFormState extends State<AddCategoryForm> {
   }
 
   bool goBack(BuildContext context) => Navigator.of(context).pop();
-
-  Future<void> showErrorMessage(String message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          titlePadding:
-              const EdgeInsets.symmetric(horizontal: 21, vertical: 21),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 21, vertical: 3),
-          backgroundColor: const Color(0xFFE0D4B9),
-          contentTextStyle: const TextStyle(fontSize: 21, color: Colors.black),
-          title: const Text('Invalid Input'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(message),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              color: Colors.green,
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Okay',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 @immutable
@@ -399,7 +358,8 @@ class _ColorPickerState extends State<ColorPicker> {
                     child: Container(
                       color: color,
                       child: InkWell(
-                        splashColor: const Color(0xFFE0D4B9),
+                        splashColor:
+                            Provider.of<TrackitThemeData>(context).colorOne,
                         onTap: () {
                           widget.onSelect(color);
                           setState(() {

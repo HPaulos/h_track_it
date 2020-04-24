@@ -36,7 +36,6 @@ class _HabitListPageState extends State<HabitListPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE0D4B9),
       appBar: AppBar(
         title: const Text("Habits"),
       ),
@@ -62,8 +61,7 @@ class _HabitListPageState extends State<HabitListPage> {
                 _updated = _habits[index];
                 _habits.removeAt(index);
                 Scaffold.of(bContext).hideCurrentSnackBar();
-                Scaffold.of(bContext).showSnackBar(new SnackBar(
-                  backgroundColor: const Color(0xFFE0D4B9),
+                Scaffold.of(bContext).showSnackBar(SnackBar(
                   duration: const Duration(seconds: 3),
                   content: InkWell(
                     onTap: () {
@@ -117,6 +115,11 @@ class _HabitListPageState extends State<HabitListPage> {
                 color: Colors.red,
               ),
               secondaryBackground: Container(
+                margin: const EdgeInsets.only(
+                  bottom: 27,
+                  top: 27,
+                ),
+                color: Colors.green,
                 child: Padding(
                   padding: const EdgeInsets.all(21.0),
                   child: Row(
@@ -138,11 +141,6 @@ class _HabitListPageState extends State<HabitListPage> {
                     ],
                   ),
                 ),
-                margin: const EdgeInsets.only(
-                  bottom: 27,
-                  top: 27,
-                ),
-                color: Colors.green,
               ),
               child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -154,15 +152,12 @@ class _HabitListPageState extends State<HabitListPage> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(21),
         child: FloatingActionButton(
-          elevation: 12,
           onPressed: () {
             Navigator.pushNamed(context, '/newHabit', arguments: _category);
           },
-          backgroundColor: const Color(0xFFFC9C35),
           child: const Icon(
             Icons.add,
             size: 27,
-            color: Colors.black,
           ),
         ),
       ),
@@ -199,7 +194,6 @@ class HabitItem extends StatelessWidget {
       },
       child: Card(
           elevation: 5,
-          color: const Color(0xFFF2EBDA),
           child: Container(
             decoration: BoxDecoration(
                 border: Border(left: BorderSide(width: 3, color: _color))),

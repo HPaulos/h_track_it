@@ -7,6 +7,7 @@ class CategoryModel {
   CategoryModel(
       {@required this.name, @required this.color, @required this.icon});
 
+
   String name;
   IconData icon;
   Color color;

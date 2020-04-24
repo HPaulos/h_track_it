@@ -16,7 +16,7 @@ class HabitModel {
   DateTime end;
   CategoryModel category;
 
-  List<String> recurrence;
+ String recurrence;
 
   DateTime get upcomming => DateTime.now();
   DateTime get last => DateTime.now();

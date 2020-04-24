@@ -23,7 +23,6 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE0D4B9),
       appBar: AppBar(
         title: const Text("Tasks List"),
         leading: Container(),

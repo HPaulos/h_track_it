@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import '../data/trackit_theme_data.dart';
 import '../data/category_data.dart';
 import '../model/category.dart';
 
@@ -10,9 +11,10 @@ class CategoryPage extends StatelessWidget {
     final categoriesProvider = Provider.of<CategoryData>(context, listen: true);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE0D4B9),
       appBar: AppBar(
-        leading: Container(),
+        leading: Icon(
+          Icons.category,
+        ),
         actions: const <Widget>[],
         title: const Text("Habit Groups"),
       ),
@@ -22,16 +24,17 @@ class CategoryPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFFF2EBDA),
-        unselectedIconTheme: const IconThemeData(color: Color(0x88FC9C35)),
-        selectedIconTheme: const IconThemeData(color: Color(0xFFFC9C35)),
+        unselectedIconTheme: IconThemeData(
+            color: Provider.of<TrackitThemeData>(context).colorThree),
+        selectedIconTheme: IconThemeData(
+            color: Provider.of<TrackitThemeData>(context).colorThree),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.layerGroup),
             title: Text('Categories'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.calendar),
+            icon: Icon(FontAwesomeIcons.list),
             title: Text('Calendar'),
           ),
         ],
@@ -45,15 +48,11 @@ class CategoryPage extends StatelessWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(21),
         child: FloatingActionButton(
-          elevation: 12,
           onPressed: () {
             Navigator.pushNamed(context, '/newCategory');
           },
-          backgroundColor: const Color(0xFFFC9C35),
           child: const Icon(
             Icons.add,
-            size: 27,
-            color: Colors.black,
           ),
         ),
       ),
@@ -105,14 +104,13 @@ class Category extends StatelessWidget {
         width: 100,
         child: Material(
           elevation: 7,
-          shadowColor: const Color(0xFFFC9C35),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(27),
             bottomRight: Radius.circular(27),
             topRight: Radius.circular(27),
             bottomLeft: Radius.circular(27),
           ),
-          color: const Color(0xFFF2EBDA),
+          color: Provider.of<TrackitThemeData>(context).colorTwo,
           child: InkWell(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(27),
@@ -120,8 +118,6 @@ class Category extends StatelessWidget {
               topRight: Radius.circular(27),
               bottomLeft: Radius.circular(27),
             ),
-            splashColor: const Color(0xFFFC9C35),
-            highlightColor: const Color(0xFFFC9C35),
             onTapDown: (details) {
               _tapPosition = details.globalPosition;
             },
@@ -174,7 +170,6 @@ class Category extends StatelessWidget {
     final size = overlay.size;
 
     return showMenu(
-      color: const Color(0xFFF2EBDA),
       elevation: 7,
       context: context,
       position: RelativeRect.fromRect(
@@ -273,10 +268,9 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
       builder: (context) {
         return AlertDialog(
           titlePadding:
-              const EdgeInsets.symmetric(vertical: 16, horizontal: 21),
+              const EdgeInsets.only(top: 16, bottom: 5, left: 21, right: 21),
           contentPadding:
               const EdgeInsets.symmetric(vertical: 12, horizontal: 21),
-          backgroundColor: const Color(0xFFE0D4B9),
           contentTextStyle: const TextStyle(fontSize: 21, color: Colors.black),
           title: const Text('Confirm Delete'),
           content: SingleChildScrollView(
@@ -295,7 +289,6 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
               },
               child: const Text(
                 'Delete',
-                style: TextStyle(color: Colors.black),
               ),
             ),
             FlatButton(
@@ -306,7 +299,6 @@ class _DeleteEditPopUpMenuState extends State<DeleteEditPopUpMenu> {
               },
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: Colors.black),
               ),
             ),
           ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:track_it/data/trackit_theme_data.dart';
 
 class HabitDetailPage extends StatefulWidget {
   @override
@@ -16,13 +18,12 @@ class _HabitDetailPageState extends State<HabitDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFE0D4B9),
         appBar: AppBar(
-          title: Text("Habit Detail"),
+          title: const Text("Habit Detail"),
         ),
         body: Container(
-          color: Color(0xFFF2EBDA),
-          padding: const EdgeInsets.all(21.0),
+          color: Provider.of<TrackitThemeData>(context).colorTwo,
+          padding: const EdgeInsets.all(21),
           child: ListView(
             children: <Widget>[
               Padding(
@@ -56,8 +57,8 @@ class _HabitDetailPageState extends State<HabitDetailPage> {
               Divider(
                 color: Colors.red,
                 height: 27,
-                indent: 21.0,
-                endIndent: 21.0,
+                indent: 21,
+                endIndent: 21,
               ),
               Padding(
                 padding: const EdgeInsets.only(
