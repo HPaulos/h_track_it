@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:track_it/data/trackit_theme_data.dart';
 import '../data/habits_data.dart';
 import '../model/category.dart';
 import '../model/habit.dart';
@@ -89,7 +90,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
     _habit.category = _category;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE0D4B9),
       appBar: AppBar(
         title: Row(
           children: <Widget>[
@@ -118,7 +118,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
               padding: const EdgeInsets.only(
                   left: 21, right: 21, top: 12, bottom: 7),
               child: Card(
-                color: const Color(0xFFF2EBDA),
                 child: Padding(
                     padding: const EdgeInsets.only(
                         left: 12, right: 12, top: 7, bottom: 7),
@@ -163,6 +162,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 12),
                                   child: TextFormField(
+                                    textAlign: TextAlign.center,
                                     onTap: () async {
                                       final pickedStartDate =
                                           await showDatePicker(
@@ -195,6 +195,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 12),
                                   child: TextFormField(
+                                    textAlign: TextAlign.center,
                                     readOnly: true,
                                     controller: _endDateController,
                                     onTap: () async {
@@ -253,7 +254,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                   child: Padding(
                                     padding: const EdgeInsets.all(7),
                                     child: RaisedButton(
-                                      color: const Color(0xFFE0D4B9),
                                       onPressed: () {
                                         if (_formKey.currentState.validate()) {
                                           habitProvider.add(_habit);
@@ -268,7 +268,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                   child: Padding(
                                     padding: const EdgeInsets.all(7),
                                     child: RaisedButton(
-                                      color: const Color(0xFFE0D4B9),
                                       onPressed: () {},
                                       child: const Text("Cancel"),
                                     ),
@@ -507,10 +506,14 @@ class _RepeateInputFormWidgetState extends State<RepeateInputFormWidget> {
                   flex: 3,
                   child: Theme(
                     data: ThemeData(
-                        canvasColor: const Color(0xFFF2EBDA),
-                        primaryColor: const Color(0xFFE0D4B9),
-                        accentColor: const Color(0xFFE0D4B9),
-                        hintColor: const Color(0xFFE0D4B9)),
+                        canvasColor:
+                            Provider.of<TrackitThemeData>(context).colorTwo,
+                        primaryColor:
+                            Provider.of<TrackitThemeData>(context).colorOne,
+                        accentColor:
+                            Provider.of<TrackitThemeData>(context).colorOne,
+                        hintColor:
+                            Provider.of<TrackitThemeData>(context).colorOne),
                     child: InputDecorator(
                       decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
@@ -520,7 +523,8 @@ class _RepeateInputFormWidgetState extends State<RepeateInputFormWidget> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(3))),
                       child: DropdownButton<String>(
-                          focusColor: const Color(0xFFF2EBDA),
+                          focusColor:
+                              Provider.of<TrackitThemeData>(context).colorTwo,
                           value: recurssion.term,
                           isExpanded: true,
                           items: <String>[
@@ -639,34 +643,31 @@ class _RepeateInputFormWidgetState extends State<RepeateInputFormWidget> {
               visible: recurssion.term == "Week",
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <String, String>{
-                        "MO": "M",
-                        "TH": "T",
-                        "WE": "W",
-                        "TH": "T",
-                        "FR": "F",
-                        "SA": "S",
-                        "SU": "S"
-                      }
-                          .entries
-                          .map((entry) => CircularButton(
-                              value: entry.value,
-                              onSelect: () {
-                                recurssion.byDay.add(entry.key);
-                                widget._onUpdate(recurssion);
-                              },
-                              onUnselect: () {
-                                recurssion.byDay.remove(entry.key);
-                                widget._onUpdate(recurssion);
-                              }))
-                          .toList()),
-                ),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <String, String>{
+                      "MO": "M",
+                      "TU": "T",
+                      "WE": "W",
+                      "TH": "T",
+                      "FR": "F",
+                      "SA": "S",
+                      "SU": "S"
+                    }
+                        .entries
+                        .map((entry) => Expanded(
+                              child: CircularButton(
+                                  value: entry.value,
+                                  onSelect: () {
+                                    recurssion.byDay.add(entry.key);
+                                    widget._onUpdate(recurssion);
+                                  },
+                                  onUnselect: () {
+                                    recurssion.byDay.remove(entry.key);
+                                    widget._onUpdate(recurssion);
+                                  }),
+                            ))
+                        .toList()),
               ),
             )
           ],
@@ -746,25 +747,26 @@ class _CircularButtonState extends State<CircularButton> {
       padding: const EdgeInsets.all(5),
       child: ClipOval(
         child: Material(
-          elevation: 5,
-          color:
-              _isSelected ? const Color(0xFFFC9C35) : const Color(0xFFE0D4B9),
-          child: InkWell(
-            splashColor: const Color(0xFFFC9C35),
-            onTap: () {
-              setState(() {
-                _isSelected = !_isSelected;
-                if (_isSelected) {
-                  widget._onSelect();
-                } else {
-                  widget._onUnselect();
-                }
-              });
-            }, // inkwell color
-            child: SizedBox(
-                width: 41,
-                height: 41,
-                child: Center(child: Text(widget._label))),
+          elevation: 3,
+          color: _isSelected
+              ? Provider.of<TrackitThemeData>(context).colorThree
+              : Provider.of<TrackitThemeData>(context).colorOne,
+          child: SizedBox(
+            height: 36,
+            child: InkWell(
+              splashColor: Provider.of<TrackitThemeData>(context).colorThree,
+              onTap: () {
+                setState(() {
+                  _isSelected = !_isSelected;
+                  if (_isSelected) {
+                    widget._onSelect();
+                  } else {
+                    widget._onUnselect();
+                  }
+                });
+              }, // inkwell color
+              child: Center(child: Text(widget._label)),
+            ),
           ),
         ),
       ),

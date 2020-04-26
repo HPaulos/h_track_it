@@ -16,7 +16,6 @@ class HabitData extends ChangeNotifier {
             name: 'Health',
             color: Colors.red,
             icon: FontAwesomeIcons.solidHeart)),
-
     HabitModel(
       end: DateTime.now(),
       start: DateTime.now(),

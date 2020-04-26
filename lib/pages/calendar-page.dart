@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:track_it/common/habit_item.dart';
+import 'package:track_it/common/search_widget.dart';
+import 'package:track_it/data/habits_data.dart';
+import 'package:track_it/data/trackit_theme_data.dart';
+import 'package:track_it/model/habit.dart';
 
 class CalendarPage extends StatefulWidget {
   @override
@@ -10,116 +16,164 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  DateFormat dateFormatter = DateFormat("MM/dd/yyyy");
-  DateFormat monthFormatter = DateFormat("MMMM");
-  DateTime selectedDate;
+  List<HabitModel> _habits;
 
   @override
   void initState() {
     super.initState();
-    this.selectedDate = DateTime.now();
   }
 
   @override
   Widget build(BuildContext context) {
+    _habits = Provider.of<HabitData>(context).habits;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tasks List"),
         leading: Container(),
         actions: const <Widget>[],
       ),
-      body: ListView(
+      body: Column(
         children: <Widget>[
-          Card(
-            margin: EdgeInsets.only(left: 21, right: 21, bottom: 3),
-            color: Color(0xFFF2EBDA),
+          Padding(
+            padding: const EdgeInsets.only(left: 12, right: 12, top: 7),
             child: Row(
               children: <Widget>[
-                IconButton(
-                    icon: Icon(
-                      FontAwesomeIcons.arrowLeft,
-                      size: 19,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        this.selectedDate = DateTime(this.selectedDate.year,
-                            this.selectedDate.month - 1, 1);
-                      });
-                    }),
                 Expanded(
-                    child: Center(
-                        child: Column(
-                  children: <Widget>[
-                    Text(
-                      monthFormatter.format(selectedDate),
-                      style:
-                          TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      dateFormatter.format(selectedDate),
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ))),
-                IconButton(
-                    icon: Icon(FontAwesomeIcons.arrowRight),
-                    onPressed: () {
-                      setState(() {
-                        this.selectedDate = DateTime(this.selectedDate.year,
-                            this.selectedDate.month + 1, 1);
-                      });
-                    }),
+                    child: SearchWidget(FocusNode(), TextEditingController()))
               ],
             ),
           ),
-          Card(
-            margin: EdgeInsets.only(left: 21, right: 21, bottom: 12),
-            color: Color(0xFFF2EBDA),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    children: List.generate(7, (index) {
-                      return Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 7.0, right: 7, bottom: 1, top: 7),
-                        child: Center(
-                          child:
-                              Text(["M", "T", "W", "T", "F", "S", "S"][index]),
+          Expanded(
+            child: Builder(builder: (bContext) {
+              if (_habits.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(27),
+                    child: Text(
+                      "No habits is found.",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 7),
+                itemCount: _habits.length,
+                itemBuilder: (ctx, index) {
+                  return Dismissible(
+                    key: UniqueKey(),
+                    onDismissed: (direction) {
+                      // _updated = _habits[index];
+                      _habits.removeAt(index);
+                      Scaffold.of(bContext).hideCurrentSnackBar();
+                      Scaffold.of(bContext).showSnackBar(SnackBar(
+                        duration: const Duration(seconds: 3),
+                        content: InkWell(
+                          onTap: () {
+                            Scaffold.of(bContext).hideCurrentSnackBar();
+                            setState(() {
+                              // _habits.insert(index, _updated);
+                            });
+                          },
+                          child: Row(
+                            children: <Widget>[
+                              const Text(
+                                "1 Task Update",
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 19),
+                              ),
+                              const Spacer(),
+                              const Text(
+                                "Undo",
+                                style:
+                                    TextStyle(color: Colors.blue, fontSize: 19),
+                              )
+                            ],
+                          ),
                         ),
                       ));
-                    }),
-                  ),
-                  _buildDateButtons()
-                ],
-              ),
-            ),
+                    },
+                    background: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.all(21.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 19),
+                              child: Icon(
+                                FontAwesomeIcons.times,
+                                size: 27,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              "Cancel",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 27),
+                            ),
+                          ],
+                        ),
+                      ),
+                      margin: const EdgeInsets.only(
+                        bottom: 27,
+                        top: 27,
+                      ),
+                      color: Colors.red,
+                    ),
+                    secondaryBackground: Container(
+                      margin: const EdgeInsets.only(
+                        bottom: 27,
+                        top: 27,
+                      ),
+                      color: Colors.green,
+                      child: Padding(
+                        padding: const EdgeInsets.all(21.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 19),
+                              child: Icon(
+                                FontAwesomeIcons.check,
+                                size: 27,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              "Complete",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 27),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: HabitItem(_habits[index])),
+                  );
+                },
+              );
+            }),
           ),
-          //event list
-          Card(
-            margin: EdgeInsets.only(left: 21, right: 21, bottom: 21),
-            color: Color(0xFFF2EBDA),
-            child: Padding(
-              padding: EdgeInsets.only(left: 21, right: 21, bottom: 21),
-              child: Container(),
-            ),
-          )
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFF2EBDA),
-        unselectedIconTheme: IconThemeData(color: Color(0x88FC9C35)),
-        selectedIconTheme: IconThemeData(color: Color(0xFFFC9C35)),
+        unselectedIconTheme: IconThemeData(
+            color: Provider.of<TrackitThemeData>(context).colorThree),
+        selectedIconTheme: IconThemeData(
+            color: Provider.of<TrackitThemeData>(context).colorThree),
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.layerGroup),
             title: Text('Categories'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.calendar),
+            icon: Icon(FontAwesomeIcons.list),
             title: Text('Calendar'),
           ),
         ],
@@ -131,60 +185,5 @@ class _CalendarPageState extends State<CalendarPage> {
         },
       ),
     );
-  }
-
-  Widget _buildDateButtons() {
-    DateTime firstDate = DateTime(selectedDate.year, selectedDate.month, 1);
-    DateTime lastDate = DateTime(selectedDate.year, selectedDate.month + 1, 0);
-    List<Widget> rows = [];
-    Widget dummyElement = Expanded(child: Container());
-
-    int addedDays = 0;
-    List<Widget> dayButtons = [];
-
-    while (addedDays < lastDate.day) {
-      dayButtons = [];
-      for (int i = 1; i <= 7; i++) {
-        if (addedDays == 0) {
-          if (firstDate.weekday == i) {
-            addedDays++;
-            dayButtons.add(_buildCircularButtons(addedDays));
-          } else {
-            dayButtons.add(dummyElement);
-          }
-        } else {
-          addedDays++;
-          if (addedDays <= lastDate.day) {
-            dayButtons.add(_buildCircularButtons(addedDays));
-          } else {
-            dayButtons.add(dummyElement);
-          }
-        }
-      }
-      rows.add(Row(
-        children: dayButtons,
-      ));
-    }
-    return Column(children: rows);
-  }
-
-  Widget _buildCircularButtons(int day) {
-    return Expanded(
-        child: Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: MaterialButton(
-          color: day == this.selectedDate.day
-              ? Color(0xFFFC9C35)
-              : Color(0xFFE0D4B9),
-          shape: CircleBorder(),
-          padding: EdgeInsets.all(12),
-          child: Text(day.toString()),
-          onPressed: () {
-            setState(() {
-              this.selectedDate = DateTime(
-                  this.selectedDate.year, this.selectedDate.month, day);
-            });
-          }),
-    ));
   }
 }
