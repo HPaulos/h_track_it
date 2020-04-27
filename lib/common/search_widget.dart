@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/trackit_theme_data.dart';
 
-class SearchWidget extends StatelessWidget {
+class SearchWidget extends StatefulWidget {
   const SearchWidget(this._searchFocusNode, this._searchController, {Key key})
       : super(key: key);
 
@@ -10,13 +10,31 @@ class SearchWidget extends StatelessWidget {
   final TextEditingController _searchController;
 
   @override
+  _SearchWidgetState createState() => _SearchWidgetState();
+}
+
+class _SearchWidgetState extends State<SearchWidget> {
+  bool _hasFocus;
+
+  @override
+  void initState() {
+    _hasFocus = widget._searchFocusNode?.hasFocus;
+    widget._searchFocusNode.addListener(() {
+      setState(() {
+        _hasFocus = widget._searchFocusNode?.hasFocus;
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Material(
       borderRadius: BorderRadius.circular(23),
       color: Provider.of<TrackitThemeData>(context).colorTwo,
-      elevation: 7,
+      elevation: 5,
       child: Container(
-        height: 40,
+        height: 41,
         child: Theme(
           data: ThemeData(
               primaryColor: Provider.of<TrackitThemeData>(context)
@@ -30,23 +48,26 @@ class SearchWidget extends StatelessWidget {
                   .withOpacity(0.5),
             ),
             child: TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
+              controller: widget._searchController,
+              focusNode: widget._searchFocusNode,
               decoration: InputDecoration(
-                  hintText: "rSearch",
+                  hintText: "Search",
                   hintStyle: const TextStyle(
                     fontSize: 16,
                     fontFamily: "Roboto",
                   ),
                   prefixIcon: Icon(Icons.search),
-                  suffixIcon: _searchFocusNode.hasFocus
+                  suffixIcon: _hasFocus
                       ? IconButton(
-                          icon: Icon(Icons.cancel),
+                          icon: Icon(
+                            Icons.clear,
+                            color: Colors.redAccent,
+                          ),
                           color:
                               Provider.of<TrackitThemeData>(context).colorThree,
                           onPressed: () {
-                            _searchFocusNode.unfocus();
-                            _searchController.clear();
+                            widget._searchFocusNode.unfocus();
+                            widget._searchController.clear();
                           })
                       : null,
                   border: InputBorder.none),

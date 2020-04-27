@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:track_it/data/trackit_theme_data.dart';
+import '../data/trackit_theme_data.dart';
 import '../data/category_data.dart';
 import '../model/category.dart';
 
@@ -123,39 +123,41 @@ class AddCategoryFormState extends State<AddCategoryForm> {
                       child: Row(
                         children: <Widget>[
                           Expanded(
-                              child: TextFormField(
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Group Name can't be empty.";
-                              } else {
-                                if (!_isUpdating &&
-                                    categoriesProvider
-                                        .searchCategoryByName(_name)) {
-                                  return "Name is already in use by another group.";
-                                }
+                              child: Material(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Group Name can't be empty.";
+                                } else {
+                                  if (!_isUpdating &&
+                                      categoriesProvider
+                                          .searchCategoryByName(_name)) {
+                                    return "Name is already in use by another group.";
+                                  }
 
-                                if (_isUpdating &&
-                                    widget.category.name.toLowerCase() !=
-                                        _name.toLowerCase() &&
-                                    categoriesProvider.searchCategoryByName(
-                                        _name.toLowerCase())) {
-                                  return "Name is already in use by another group.";
-                                }
+                                  if (_isUpdating &&
+                                      widget.category.name.toLowerCase() !=
+                                          _name.toLowerCase() &&
+                                      categoriesProvider.searchCategoryByName(
+                                          _name.toLowerCase())) {
+                                    return "Name is already in use by another group.";
+                                  }
 
-                                return null;
-                              }
-                            },
-                            controller: _controller,
-                            decoration: _decoration.copyWith(
-                              labelText: "Group Name",
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  Icons.clear,
-                                  color: Colors.redAccent,
+                                  return null;
+                                }
+                              },
+                              controller: _controller,
+                              decoration: _decoration.copyWith(
+                                labelText: "Group Name",
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    color: Colors.redAccent,
+                                  ),
+                                  onPressed: () {
+                                    _controller.text = "";
+                                  },
                                 ),
-                                onPressed: () {
-                                  _controller.text = "";
-                                },
                               ),
                             ),
                           ))

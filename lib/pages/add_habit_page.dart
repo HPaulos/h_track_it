@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:track_it/data/trackit_theme_data.dart';
 import '../data/habits_data.dart';
+import '../data/trackit_theme_data.dart';
 import '../model/category.dart';
 import '../model/habit.dart';
 
@@ -106,7 +106,9 @@ class _AddHabitPageState extends State<AddHabitPage> {
           ],
         ),
         leading: IconButton(
-          icon: Icon(Icons.clear, color: Colors.black),
+          icon: Icon(
+            Icons.clear,
+          ),
           onPressed: () => cancel(context),
         ),
       ),

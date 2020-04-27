@@ -5,10 +5,10 @@ import 'data/trackit_theme_data.dart';
 import 'data/category_data.dart';
 import 'pages/add_category.dart';
 import 'pages/add_habit_page.dart';
-import 'pages/calendar-page.dart';
 import 'pages/category_page.dart';
 import 'pages/habit_detail_page.dart';
 import 'pages/habit_list_page.dart';
+import 'pages/tasks_page.dart';
 
 void main() => runApp(MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => CategoryData()),
@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
         canvasColor: colorTwo,
         buttonColor: colorOne,
         disabledColor: colorTwo,
+        accentColor: colorThree,
         dialogBackgroundColor: Provider.of<TrackitThemeData>(context).colorTwo,
         floatingActionButtonTheme:
             Theme.of(context).floatingActionButtonTheme.copyWith(
@@ -62,7 +63,7 @@ class MyApp extends StatelessWidget {
         '/habits': (context) => HabitListPage(),
         '/categories': (context) => CategoryPage(),
         '/habitdetail': (context) => HabitDetailPage(),
-        '/calendar': (context) => CalendarPage(),
+        '/calendar': (context) => TasksPage(),
         '/newCategory': (context) => AddCategoryPage(),
         '/newHabit': (context) => AddHabitPage()
       },

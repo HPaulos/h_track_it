@@ -18,6 +18,7 @@ linter:
     # Single quotes are easier to type and don't compromise on readability.
     prefer_double_quotes: false
     prefer_single_quotes: false
+    lines_longer_than_80_chars: true
     # Conflicts with `omit_local_variable_types` and other rules.
     # As per Dart guidelines, we want to avoid unnecessary types to make the code
     # more readable.

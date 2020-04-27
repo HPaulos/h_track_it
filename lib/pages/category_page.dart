@@ -9,6 +9,7 @@ class CategoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoriesProvider = Provider.of<CategoryData>(context, listen: true);
+    final colorThree = Provider.of<TrackitThemeData>(context).colorThree;
 
     return Scaffold(
       appBar: AppBar(
@@ -24,18 +25,19 @@ class CategoryPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        unselectedIconTheme: IconThemeData(
-            color: Provider.of<TrackitThemeData>(context).colorThree),
-        selectedIconTheme: IconThemeData(
-            color: Provider.of<TrackitThemeData>(context).colorThree),
-        items: const <BottomNavigationBarItem>[
+        unselectedIconTheme: IconThemeData(color: colorThree),
+        selectedIconTheme: IconThemeData(color: colorThree),
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.layerGroup),
-            title: Text('Categories'),
+            icon: Icon(
+              FontAwesomeIcons.objectGroup,
+              color: colorThree.withOpacity(0.3),
+            ),
+            title: const Text('Categories'),
           ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.list),
-            title: Text('Calendar'),
+            title: const Text('Tasks'),
           ),
         ],
         currentIndex: 0,
